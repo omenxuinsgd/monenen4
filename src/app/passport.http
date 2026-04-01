@@ -1,0 +1,46 @@
+### Variabel Konfigurasi
+@baseUrl = https://localhost:7180
+@contentType = application/json
+
+### 1. Memulai Koneksi NFC
+# Sesuai dengan fungsi startNFC()
+POST {{baseUrl}}/startNFC
+Content-Type: {{contentType}}
+
+{}
+
+---
+
+### 2. Mengirim Kunci BAC (Basic Access Control)
+# Sesuai dengan fungsi sendBAC() dan form input di HTML
+POST {{baseUrl}}/sendBAC
+Content-Type: {{contentType}}
+
+{
+    "docNumber": "A12345678",
+    "dob": "950101",
+    "doe": "300101"
+}
+
+---
+
+### 3. Mengambil Data MRZ (Machine Readable Zone)
+# Sesuai dengan fungsi getMRZ()
+GET {{baseUrl}}/getMRZ
+Accept: {{contentType}}
+
+---
+
+### 4. Mengambil Foto Wajah dari Chip
+# Sesuai dengan fungsi getImage()
+GET {{baseUrl}}/getImage
+Accept: image/jpeg
+
+---
+
+### 5. Menghentikan Koneksi NFC
+# Sesuai dengan fungsi stopNFC()
+POST {{baseUrl}}/stopNFC
+Content-Type: {{contentType}}
+
+{}

@@ -1,0 +1,32 @@
+### Variabel untuk alamat server
+
+@baseUrl = http://127.0.0.1:8000
+
+### 1. Cek Status API (Root) Digunakan untuk memastikan server sudah berjalan dengan benar
+
+GET {{baseUrl}}/
+Accept: application/json
+
+### 2. Scan Barcode / Data Matrix, Pastikan file 'barcode.png' berada di folder yang sama dengan file .http ini, Jika menggunakan file lain, ganti nama 'barcode.png' di bawah
+
+POST {{baseUrl}}/scan
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="barcode123.png"
+Content-Type: image/png
+
+< ./barcode123.png
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### 3. Scan Data Matrix (Contoh barcode123.png)
+
+POST {{baseUrl}}/scan
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="barcode123.png"
+Content-Type: image/png
+
+< ./barcode123.png
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
