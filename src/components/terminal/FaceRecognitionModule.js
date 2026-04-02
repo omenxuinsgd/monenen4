@@ -31,7 +31,7 @@ import {
  * Update: Visualisasi Atribut Wajah (Mask, Gender, Age, Pose, Spoof) dalam kontainer terstruktur.
  */
 const FaceRecognitionModule = ({ data: propsData, activeTab }) => {
-  const baseUrl = "http://localhost:5160";
+  const baseUrl = "http://localhost:5000";
   
   // State dasar
   const [logs, setLogs] = useState([`[SYSTEM] Face Recognition Engine v3.2 Online.`]);

@@ -42,7 +42,7 @@ const SignPadModule = ({ data }) => {
     }
   ]);
 
-  const API_BASE = "https://localhost:7180"; 
+  const API_BASE = "http://localhost:5000"; 
 
   useEffect(() => {
     console.log("[DEBUG] SignPadModule Initialized. Waiting for signature capture event.");

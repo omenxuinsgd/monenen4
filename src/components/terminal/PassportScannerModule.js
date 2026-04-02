@@ -28,7 +28,7 @@ import {
  * INTEGRASI: Menghubungkan Thalles Scanner T10K API ke menu Validasi Paspor.
  */
 const PassportScannerModule = ({ data, activeTab: propActiveTab }) => {
-  const baseUrl = "http://localhost:5160"; // Base URL untuk API
+  const baseUrl = "http://localhost:5000"; // Base URL untuk API
   const [logs, setLogs] = useState([`[SYSTEM] Passport Intelligence v1.7 Online.`]);
   const [activeTab, setActiveTab] = useState('control'); 
   const [isProcessing, setIsProcessing] = useState(false);
