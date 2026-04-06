@@ -63,6 +63,7 @@ const TerminalView = (props) => {
   const [isSignPadReady, setIsSignPadReady] = useState(false);
   const [isDrawing, setIsDrawing] = useState(false);
   const canvasRef = useRef(null);
+  const [scannerLogs, setScannerLogs] = useState([]); 
   
   const shortTitle = props.data?.short?.split(' ')[0] || "SISTEM";
 
@@ -80,6 +81,8 @@ const TerminalView = (props) => {
       `[${new Date().toLocaleTimeString()}] SISTEM_INITIALIZED`,
       `[${new Date().toLocaleTimeString()}] MODUL_${shortTitle.toUpperCase()}_SIAGA`
     ]);
+
+    const handleScannerLogs = (event) => setScannerLogs(event.detail);
 
     const handleSignPadReady = () => {
       setIsSignPadReady(true);
@@ -119,6 +122,7 @@ const TerminalView = (props) => {
     window.addEventListener('terminal:log', handleTerminalLog);
     window.addEventListener('signpad:data-ready', handleSignPadReady);
     window.addEventListener('signpad:data-reset', handleSignPadReset);
+    window.addEventListener('scanner:logs-sync', handleScannerLogs);
 
     return () => {
       window.removeEventListener('palm:scanning-state', handleScanningState);
@@ -126,6 +130,7 @@ const TerminalView = (props) => {
       window.removeEventListener('terminal:log', handleTerminalLog);
       window.removeEventListener('signpad:data-ready', handleSignPadReady);
       window.removeEventListener('signpad:data-reset', handleSignPadReset);
+      window.removeEventListener('scanner:logs-sync', handleScannerLogs);
     };
   }, [props.data?.image, shortTitle]);
 
@@ -188,7 +193,7 @@ const TerminalView = (props) => {
 
   // --- 5. TABS CONFIGURATION ---
   const tabs = isFaceRecognition
-    ? [{ id: 'face_enrollment', label: 'Enrollment', type: 'enroll' }, { id: 'face_verification', label: 'Verification', type: 'verify' }]
+    ? [{ id: 'face_enrollment', label: 'Pendaftaran', type: 'enroll' }, { id: 'face_verification', label: 'Verifikasi', type: 'verify' }]
     : isPalmVein
       ? [
           { id: 'enrollment', label: 'Enrollment', type: 'enroll' },
@@ -209,7 +214,7 @@ const TerminalView = (props) => {
 
   // --- 6. RENDER SIDEBAR (KOLOM KIRI) ---
   const LeftColumn = (
-    <div className="w-[500px] flex flex-col items-start shrink-0 h-full max-h-screen overflow-hidden font-mono text-left" suppressHydrationWarning>
+    <div className="w-[610px] flex flex-col items-start shrink-0 h-full max-h-screen overflow-hidden font-mono text-left" suppressHydrationWarning>
       
       {/* AREA VISUAL UTAMA */}
       <div className="relative w-full aspect-square border-2 border-[#00ffff]/40 bg-black overflow-hidden rounded-sm mb-4 shadow-lg shrink-0 group">
@@ -231,7 +236,7 @@ const TerminalView = (props) => {
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               transition={{ duration: isLiveStream ? 0 : 0.4 }}
               src={previewImage || previewUrl || props.data?.image} 
-              alt="Visual State" className="w-full h-full object-contain bg-black" 
+              alt="Visual State" className="w-full h-full object-cover bg-black" 
             />
           </AnimatePresence>
         )}
@@ -304,7 +309,7 @@ const TerminalView = (props) => {
       )}
 
       {/* SYSTEM CONSOLE LOG CONTAINER */}
-      <div className="w-full border-2 border-[#00ffff]/20 bg-zinc-950/60 rounded-sm flex flex-col shadow-2xl shrink-0 h-44 overflow-hidden mt-auto">
+      {/* <div className="w-full border-2 border-[#00ffff]/20 bg-zinc-950/60 rounded-sm flex flex-col shadow-2xl shrink-0 h-44 overflow-hidden mt-auto">
           <div className="flex items-center justify-between px-4 py-2 border-b border-[#00ffff]/10 bg-black/40">
              <div className="flex items-center gap-2">
                 <TerminalIcon size={12} className="text-[#00ffff]" />
@@ -321,7 +326,41 @@ const TerminalView = (props) => {
              ))}
              {consoleLogs.length === 0 && <div className="text-zinc-800 uppercase italic">Awaiting_Boot_Sequence...</div>}
           </div>
-      </div>
+      </div> */}
+
+      {/* DEVICE CONSOLE OUTPUT (Scrollable with Fixed Max Height) */}
+            <div className="w-full border-2 border-[#00ffff]/40 bg-zinc-950 rounded-sm relative overflow-hidden flex flex-col min-h-[160px] max-h-[300px] shadow-2xl flex-1">
+               {(isDocScanner || isPassportScanner || isFaceRecognition) ? (
+                 <div className="p-3 flex flex-col flex-1 overflow-hidden">
+                    <div className="flex items-center justify-between border-b border-[#00ffff]/20 pb-2 mb-2 shrink-0">
+                       <div className="flex items-center gap-2 text-[#00ffff] font-black uppercase text-[14px]">
+                          <TerminalIcon size={18} className="animate-pulse" />
+                          <span>Device_Console_Output</span>
+                       </div>
+                       <div className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Streaming_Sync</div>
+                    </div>
+                    <div className="flex-1 overflow-y-auto custom-scrollbar space-y-1 font-mono text-[12px] pr-2">
+                       {scannerLogs.length > 0 ? (
+                          scannerLogs.map((log, i) => (
+                            <div key={i} className={`flex gap-3 leading-tight ${log.includes('[ERROR]') ? 'text-red-400' : log.includes('[SUCCESS]') ? 'text-emerald-400' : 'text-zinc-400'}`}>
+                               <span className="opacity-20 shrink-0 font-bold">{(scannerLogs.length - i).toString().padStart(2, '0')}</span>
+                               <span className="break-all">{log}</span>
+                            </div>
+                          ))
+                       ) : (
+                          <div className="h-full flex items-center justify-center text-zinc-700 italic uppercase tracking-widest text-[8px]">
+                            Waiting for device activity...
+                          </div>
+                       )}
+                    </div>
+                 </div>
+               ) : (
+                 <div className="p-6 flex flex-col items-center justify-center text-center">
+                    <Activity size={48} className="text-[#00ffff]/10 mb-4" />
+                    <span className="text-[10px] text-[#00ffff]/40 font-black uppercase tracking-[0.2em]">System_Ready_State</span>
+                 </div>
+               )}
+            </div>
 
       <style jsx global>{`
         .path-arrow-start { clip-path: polygon(0% 0%, calc(100% - 18px) 0%, 100% 50%, calc(100% - 18px) 100%, 0% 100%); }

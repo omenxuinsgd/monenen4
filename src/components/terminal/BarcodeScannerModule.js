@@ -119,7 +119,7 @@ const BarcodeScannerModule = ({ data }) => {
       <div className="flex flex-col lg:flex-row gap-6 items-start shrink-0">
         
         {/* Unit Visual (Gojo GIF) */}
-        <div className="w-full lg:w-[190px] flex flex-col items-center gap-2 shrink-0">
+        {/* <div className="w-full lg:w-[190px] flex flex-col items-center gap-2 shrink-0">
           <div className="relative w-full aspect-[1.25/1] border-2 border-[#00ffff]/20 bg-zinc-950 overflow-hidden group shadow-2xl rounded-sm">
             <img 
               src="https://media.tenor.com/5xqhfhbtx78AAAAj/gojo.gif" 
@@ -145,7 +145,7 @@ const BarcodeScannerModule = ({ data }) => {
             )}
           </div>
           <span className="text-[8px] text-[#00ffff]/40 font-bold uppercase tracking-[0.3em]">Local_Buffer_v1</span>
-        </div>
+        </div> */}
 
         {/* Panel Kontrol Capture */}
         <div className="flex-1 border-2 border-[#00ffff]/40 bg-zinc-900/60 p-5 relative rounded-sm group flex flex-col gap-4 shadow-2xl min-h-[160px]">

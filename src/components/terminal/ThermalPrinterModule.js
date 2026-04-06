@@ -76,7 +76,7 @@ const ThermalPrinterModule = ({ data, activeTab }) => {
     <div className="flex-1 p-8 flex flex-col gap-4 overflow-y-auto custom-scrollbar">
       <div className="flex flex-col lg:flex-row gap-10 items-start">
         {/* VISUAL STATUS */}
-        <div className="w-full lg:w-[190px] flex flex-col items-center gap-2 shrink-0">
+        {/* <div className="w-full lg:w-[190px] flex flex-col items-center gap-2 shrink-0">
           <div className="relative w-full aspect-[1.25/1] border-2 border-[#00ffff]/20 bg-zinc-950 overflow-hidden group">
             <img 
               src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExdTlocWRmemY1c243MG93cmk4bTFsdm1heXJtMmJ2YmVybTMxODJnbiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/kSxi9DiWH4Q8q1Kbql/giphy.gif " 
@@ -86,7 +86,7 @@ const ThermalPrinterModule = ({ data, activeTab }) => {
             <div className="absolute top-0 left-0 w-full h-[1px] bg-[#00ffff]/30 animate-scan-fast pointer-events-none" />
           </div>
           <span className="text-[8px] text-[#00ffff]/40 font-bold uppercase tracking-[0.3em]">Thermal_Service_V.1</span>
-        </div>
+        </div> */}
 
         {/* CONFIGURATION FORM */}
         <div className="flex-1 h-[155px] border-2 border-[#00ffff]/40 bg-zinc-900/60 pt-6 px-6 pb-12 relative rounded-sm group flex flex-col justify-start gap-4 overflow-visible">
@@ -151,8 +151,8 @@ const ThermalPrinterModule = ({ data, activeTab }) => {
       </div>
 
       {/* LOWER SECTION: KEYBOARD & LOGS */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 h-fit">
-        <div className="border-2 border-[#00ffff]/20 bg-zinc-950/80 p-4 flex flex-col rounded-sm relative text-left">
+      <div className="grid grid-cols-1 xl:grid-cols-1 gap-4 h-fit">
+        {/* <div className="border-2 border-[#00ffff]/20 bg-zinc-950/80 p-4 flex flex-col rounded-sm relative text-left">
           <div className="flex justify-between items-center border-b border-[#00ffff]/10 pb-1 mb-2 font-black text-[#00ffff]/60 uppercase text-[9px] tracking-widest">
             <span>Manual_Input_Registry</span>
             <Keyboard size={12} className="text-[#00ffff]/30" />
@@ -166,7 +166,7 @@ const ThermalPrinterModule = ({ data, activeTab }) => {
             })}
           </div>
           <button onClick={() => setPrintText("")} className="mt-3 py-1 border border-[#ff00ff]/40 text-[#ff00ff] text-[8px] uppercase font-bold hover:bg-[#ff00ff]/10">Clear Input</button>
-        </div>
+        </div> */}
 
         <div className="border-2 border-[#00ffff]/20 bg-black/90 p-4 flex flex-col rounded-sm relative overflow-hidden shadow-inner text-left font-mono text-[10px] text-zinc-400">
           <div className="text-[9px] text-[#00ffff] font-black mb-2 uppercase flex items-center gap-2 border-b border-[#00ffff]/10 pb-1 tracking-widest">

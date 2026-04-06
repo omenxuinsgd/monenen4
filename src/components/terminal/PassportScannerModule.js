@@ -426,7 +426,7 @@ const PassportScannerModule = ({ data, activeTab: propActiveTab }) => {
         /* TAMPILAN STANDARD UNTUK VALIDASI & PEMBACA */
         <>
           <div className="flex flex-col lg:flex-row gap-8 items-start shrink-0">
-            <div className="w-full lg:w-[190px] flex flex-col items-center gap-2 shrink-0">
+            {/* <div className="w-full lg:w-[190px] flex flex-col items-center gap-2 shrink-0">
               <div className="relative w-full aspect-[1.25/1] border-2 border-[#00ffff]/20 bg-zinc-950 overflow-hidden shadow-2xl rounded-sm group">
                 <div className="w-full h-full relative">
                   <img src={isProcessing ? "https://cdn.dribbble.com/userupload/23642809/file/original-129fd5d25fa96a3437877562aa243ad6.gif" : "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExb2N3ZXg5NzV5ZW9hZHJpY2xxMjRid2Q3dGt3aTBuNWwyMWI0cTFwbyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/gUNA7QH4AeLde/giphy.gif"} alt="Status" className={`w-full h-full object-cover transition-all duration-500 ${isScannerActive ? 'opacity-90' : 'opacity-40 grayscale'}`} />
@@ -436,7 +436,7 @@ const PassportScannerModule = ({ data, activeTab: propActiveTab }) => {
                 </div>
               </div>
               <span className="text-[8px] text-[#00ffff]/40 font-bold uppercase tracking-[0.3em]">Passport_Buffer_v1.7</span>
-            </div>
+            </div> */}
 
             <div className="flex-1 border-2 border-[#00ffff]/40 bg-zinc-900/60 p-6 relative rounded-sm flex flex-col shadow-2xl min-h-[160px]">
               <div className="absolute -top-[12px] left-6 bg-white text-black px-4 py-0.5 text-[10px] font-black uppercase z-[50] shadow-md">

@@ -145,7 +145,7 @@ const SignPadModule = ({ data }) => {
   return (
     <div className="flex-1 p-6 flex flex-col gap-5 overflow-y-auto custom-scrollbar">
       <div className="flex flex-col lg:flex-row gap-8 items-start shrink-0">
-        <div className="w-full lg:w-[190px] flex flex-col items-center gap-2 shrink-0">
+        {/* <div className="w-full lg:w-[190px] flex flex-col items-center gap-2 shrink-0">
           <div className="relative w-full aspect-[1.25/1] border-2 border-[#00ffff]/30 bg-zinc-950 overflow-hidden shadow-2xl rounded-sm group">
              <img 
                 src="https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExb2N3ZXg5NzV5ZW9hZHJpY2xxMjRid2Q3dGt3aTBuNWwyMWI0cTFwbyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/gUNA7QH4AeLde/giphy.gif" 
@@ -165,7 +165,7 @@ const SignPadModule = ({ data }) => {
             )}
           </div>
           <span className="text-[8px] text-[#00ffff]/40 font-bold uppercase tracking-[0.3em]">Sign_Buffer_v1</span>
-        </div>
+        </div> */}
 
         <div className="flex-1 border-2 border-[#00ffff]/40 bg-zinc-900/60 p-5 relative rounded-sm flex flex-col shadow-2xl min-h-[160px]">
           <div className="absolute -top-[12px] left-6 bg-white text-black px-4 py-0.5 text-[10px] font-black uppercase z-[50]">Registrasi Data User</div>

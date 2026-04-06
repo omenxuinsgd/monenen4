@@ -125,6 +125,6 @@ export const CONTENT_DATA = [
     tag: "Perimeter Sec", 
     Icon: Nfc, 
     status: "Sistem Pengenalan Wajah",
-    image: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&q=80&w=800" 
+    image: "https://www.tnitech.co/_next/image?url=%2Fimages%2Fhome%2Ffr.gif&w=3840&q=75" 
   }
 ];

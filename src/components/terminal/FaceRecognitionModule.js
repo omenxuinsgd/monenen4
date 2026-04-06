@@ -50,6 +50,7 @@ const FaceRecognitionModule = ({ data: propsData, activeTab }) => {
   const [userData, setUserData] = useState({ userId: "12345" });
 
   useEffect(() => {
+    // window.dispatchEvent(new CustomEvent('scanner:logs-sync', { detail: logs }));
     const stored = localStorage.getItem("registrationData");
     if (stored) {
       const parsed = JSON.parse(stored);
@@ -61,6 +62,11 @@ const FaceRecognitionModule = ({ data: propsData, activeTab }) => {
 
     return () => stopCamera();
   }, []);
+
+  useEffect(() => {
+    // Hanya kirim event jika logs berubah, tanpa memicu kembali useEffect pertama
+    window.dispatchEvent(new CustomEvent('scanner:logs-sync', { detail: logs }));
+  }, [logs]);
 
   const addLog = (msg, type = "info") => {
     const timestamp = new Date().toLocaleTimeString();
@@ -319,57 +325,30 @@ const FaceRecognitionModule = ({ data: propsData, activeTab }) => {
     <div className="w-full h-full p-4 flex flex-col gap-5 overflow-hidden text-left bg-zinc-950/20 font-mono">
       
       {/* BARIS ATAS */}
-      <div className="h-[520px] py-4 flex flex-col lg:flex-row gap-8 overflow-hidden shrink-0">
+      <div className="h-[740px] py-4 flex flex-col lg:flex-row gap-6 overflow-hidden shrink-0">
         
-        {/* SISI KIRI: Operasi */}
-        <div className="w-full lg:w-[190px] h-full shrink-0 overflow-hidden">
-          <div className="h-full border-2 border-[#00ffff]/40 bg-zinc-950 p-4 rounded-sm shadow-[0_0_20px_rgba(0,255,255,0.1)] relative overflow-hidden flex flex-col gap-3">
-            <div className="text-[9px] text-[#00ffff] font-black uppercase tracking-[0.2em] border-b border-[#00ffff]/20 pb-2 flex items-center gap-2">
-               <Zap size={12} fill="#00ffff" /> 
-               <span>Ops_Monitor</span>
-            </div>
-
-            <div className="flex-1 flex flex-col gap-1.5 min-h-0">
-              <span className="text-[7px] text-[#00ffff]/40 uppercase font-black tracking-widest">Live_Capture</span>
-              <div className="relative w-full h-1/2 min-h-0 border border-[#00ffff]/30 bg-black/60 rounded-sm overflow-hidden flex items-center justify-center">
-                <canvas ref={cameraCanvasRef} className="w-full h-full object-cover" />
-                {!isConnected && <div className="opacity-10"><Camera size={24} /></div>}
-                <div className="absolute top-2 left-2 bg-black/40 px-1 py-0.5 border border-[#00ffff]/20 text-[6px] text-[#00ffff] uppercase font-black">Raw_Stream</div>
-              </div>
-
-              <span className="text-[7px] text-[#00ffff]/40 uppercase font-black tracking-widest mt-1">Tracking_Output</span>
-              <div className="relative w-full flex-1 min-h-0 border border-[#00ffff]/30 bg-black/60 rounded-sm overflow-hidden flex items-center justify-center">
-                <canvas ref={resultCanvasRef} className="w-full h-full object-cover" />
-                {isProcessing && <div className="absolute top-0 left-0 w-full h-[1px] bg-[#00ffff] shadow-[0_0_10px_#00ffff] animate-pixel-scan z-20" />}
-                {!isConnected && <div className="opacity-10"><User size={48} /></div>}
-              </div>
-            </div>
-            
-            <div className="text-[8px] text-[#00ffff]/40 font-bold uppercase tracking-[0.4em] text-center">V.3.2_SECURE</div>
-          </div>
-        </div>
 
         {/* SISI KANAN: Data Vault */}
-        <div className="flex-1 h-full border-2 border-[#00ffff]/40 bg-zinc-900/60 p-5 relative rounded-sm group flex flex-col gap-4 shadow-xl overflow-hidden">
-          <div className="absolute -top-[12px] left-6 bg-white text-black px-4 py-0.5 text-[10px] font-black uppercase z-50">
+        <div className="flex-1 h-full border-2 border-[#00ffff]/40 bg-zinc-900/60 pt-6 px-6 pb-12 relative rounded-sm group flex flex-col justify-start gap-4 overflow-visible">
+          <div className="absolute -top-[12px] left-6 bg-white text-black px-4 py-0.5 text-[14px] font-black uppercase z-50">
             {activeTab === 'face_enrollment' ? 'Personal Biometric Data Vault' : 'Biometric Identity Verification'}
           </div>
 
           {/* Controls */}
           <div className="flex items-center justify-between bg-black/60 p-3 border border-[#00ffff]/10 rounded-sm shrink-0">
             <div className="flex items-center gap-3">
-              <div className={`w-2.5 h-2.5 rounded-full ${isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
+              <div className={`w-4 h-4 rounded-full ${isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
               <div className="flex flex-col leading-tight">
-                <span className={`text-[10px] font-black uppercase tracking-widest ${isConnected ? 'text-emerald-400' : 'text-red-400'}`}>
-                  {isConnected ? 'NODE_ACTIVE' : 'NODE_STANDBY'}
+                <span className={`text-[14px] font-black uppercase tracking-widest ${isConnected ? 'text-emerald-400' : 'text-red-400'}`}>
+                  {isConnected ? 'KAMERA_NYALA' : 'KAMERA_MATI'}
                 </span>
-                <span className="text-[7px] text-zinc-500 uppercase tracking-[0.2em]">UID: {userData.userId}</span>
+                {/* <span className="text-[7px] text-zinc-500 uppercase tracking-[0.2em]">UID: {userData.userId}</span> */}
               </div>
             </div>
             
             <div className="flex gap-2">
-              <button onClick={isConnected ? stopCamera : startCamera} className={`px-4 py-1.5 border-2 text-[9px] font-black uppercase rounded-sm transition-all flex items-center gap-2 ${isConnected ? 'border-red-500 text-red-500 hover:bg-red-500 hover:text-white' : 'border-[#00ffff] text-[#00ffff] hover:bg-[#00ffff] hover:text-black'}`}>
-                {isConnected ? <Power size={12} /> : <Video size={12} />}
+              <button onClick={isConnected ? stopCamera : startCamera} className={`px-4 py-1.5 border-2 text-[12px] font-black uppercase rounded-sm transition-all flex items-center gap-2 ${isConnected ? 'border-red-500 text-red-500 hover:bg-red-500 hover:text-white' : 'border-[#00ffff] text-[#00ffff] hover:bg-[#00ffff] hover:text-black'}`}>
+                {isConnected ? <Power size={15} /> : <Video size={18} />}
                 {isConnected ? 'Stop sensor' : 'Start sensor'}
               </button>
 
@@ -392,8 +371,8 @@ const FaceRecognitionModule = ({ data: propsData, activeTab }) => {
           <div className="flex-1 min-h-0 border border-[#00ffff]/10 rounded-sm overflow-hidden bg-black/20">
             {activeTab === 'face_enrollment' ? (
               <div className="h-full overflow-y-auto custom-scrollbar">
-                <table className="w-full border-collapse text-left">
-                  <thead className="sticky top-0 bg-zinc-900 z-10 border-b border-[#00ffff]/30 text-[9px] font-black text-[#00ffff] uppercase">
+                <table className="w-full border-collapse text-center">
+                  <thead className="sticky top-0 bg-zinc-900 z-10 border-b border-[#00ffff]/30 text-[12px] font-black text-[#00ffff] uppercase">
                     <tr><th className="p-3 w-20">UID</th><th className="p-3">Subject Name</th><th className="p-3">Bio_Frame</th><th className="p-3">Timestamp</th><th className="p-3 text-right">Ops</th></tr>
                   </thead>
                   <tbody className="text-[9px]">
@@ -496,10 +475,39 @@ const FaceRecognitionModule = ({ data: propsData, activeTab }) => {
             )}
           </div>
         </div>
+
+        {/* SISI KIRI: Operasi */}
+        <div className="w-full lg:w-[520px] h-full shrink-0 overflow-hidden">
+          <div className="h-full border-2 border-[#00ffff]/40 bg-zinc-950 p-4 rounded-sm shadow-[0_0_20px_rgba(0,255,255,0.1)] relative overflow-hidden flex flex-col gap-3">
+            <div className="text-[12px] text-[#00ffff] font-black uppercase tracking-[0.2em] border-b-5 border-[#00ffff]/20 pb-2 flex items-center gap-2">
+               <Zap size={12} fill="#00ffff" /> 
+               <span>Tracking_Output</span>
+            </div>
+
+            <div className="flex-1 flex flex-col gap-1.5 min-h-0">
+              {/* <span className="text-[12px] text-[#00ffff]/40 uppercase font-black tracking-widest text-center mt-1">Live_Capture</span>
+              <div className="relative w-full h-1/2 min-h-0 border border-[#00ffff]/30 bg-black/60 rounded-sm overflow-hidden flex items-center justify-center">
+                <canvas ref={cameraCanvasRef} className="w-full h-full object-cover" />
+                {!isConnected && <div className="opacity-10 pr-52"><Camera size={88} /></div>}
+                <div className="absolute top-2 left-2 bg-black/40 px-1 py-0.5 border border-[#00ffff]/20 text-[10px] text-[#00ffff] uppercase font-black">Raw_Stream</div>
+              </div> */}
+
+              {/* <span className="text-[10px] text-[#00ffff]/40 uppercase font-black tracking-widest mt-3 text-center">Tracking_Output</span> */}
+              {/* <div className="relative w-full flex-1 min-h-0 border border-[#00ffff]/30 bg-black/60 rounded-sm overflow-hidden flex items-center justify-center"> */}
+              <div className="relative w-full flex-1 min-h-0 bg-black/60 rounded-sm overflow-hidden flex items-center justify-center">
+                <canvas ref={resultCanvasRef} className="w-full h-full object-cover" />
+                {isProcessing && <div className="absolute top-0 left-0 w-full h-[1px] bg-[#00ffff] shadow-[0_0_10px_#00ffff] animate-pixel-scan z-20" />}
+                {!isConnected && <div className="opacity-10 pr-120"><User size={88} /></div>}
+              </div>
+            </div>
+            
+            {/* <div className="text-[8px] text-[#00ffff]/40 font-bold uppercase tracking-[0.4em] text-center">V.3.2_SECURE</div> */}
+          </div>
+        </div>
       </div>
 
       {/* BARIS BAWAH */}
-      <div className="h-[260px] w-full overflow-hidden shrink-0">
+      {/* <div className="h-[180px] w-full overflow-hidden shrink-0">
         <div className="border-2 border-[#00ffff]/20 bg-black/90 p-4 flex flex-col rounded-sm font-mono text-[11px] h-full shadow-inner">
           <div className="flex items-center gap-2 text-[#00ffff] uppercase font-black border-b border-[#00ffff]/10 pb-2 mb-2">
             <Activity size={12} className="animate-pulse" />
@@ -513,7 +521,7 @@ const FaceRecognitionModule = ({ data: propsData, activeTab }) => {
             ))}
           </div>
         </div>
-      </div>
+      </div> */}
 
       <style jsx>{`
         @keyframes pixel-scan { 0% { top: 0; } 100% { top: 100%; } }

@@ -206,7 +206,7 @@ const OCRScannerModule = ({
       <div className="flex flex-col lg:flex-row gap-8 items-start shrink-0">
         
         {/* Unit Visual Mini */}
-        <div className="w-full lg:w-[190px] flex flex-col items-center gap-2 shrink-0 text-right">
+        {/* <div className="w-full lg:w-[190px] flex flex-col items-center gap-2 shrink-0 text-right">
           <div className="relative w-full aspect-[1.25/1] border-2 border-[#00ffff]/20 bg-zinc-950 overflow-hidden shadow-2xl group">
             <div className="w-full h-full relative">
               <img 
@@ -237,7 +237,7 @@ const OCRScannerModule = ({
             )}
           </div>
           <span className="text-[8px] text-[#00ffff]/40 font-bold uppercase tracking-[0.3em]">Recognition_Buffer_v1</span>
-        </div>
+        </div> */}
 
         {/* Panel Kontrol Capture */}
         <div className="flex-1 border-2 border-[#00ffff]/40 bg-zinc-900/60 p-6 relative rounded-sm flex flex-col gap-4 shadow-2xl">
