@@ -149,16 +149,16 @@ const BarcodeScannerModule = ({ data }) => {
 
         {/* Panel Kontrol Capture */}
         <div className="flex-1 border-2 border-[#00ffff]/40 bg-zinc-900/60 p-5 relative rounded-sm group flex flex-col gap-4 shadow-2xl min-h-[160px]">
-          <div className="absolute -top-[12px] left-6 bg-white text-black px-4 py-0.5 text-[10px] font-black uppercase z-[50]">Capture Control</div>
+          <div className="absolute -top-[12px] left-6 bg-white text-black px-4 py-0.5 text-[10px] font-black uppercase z-[50] font-mono text-[14px]">Capture Control</div>
           <div className="flex flex-col md:flex-row gap-4 items-end">
             <div className="flex-1 w-full space-y-1">
-              <label className="text-[9px] text-[#00ffff]/60 font-black block uppercase tracking-widest flex items-center gap-2">
-                <Scan size={10} /> Mode Operasi
+              <label className="text-[12px] text-[#00ffff]/60 font-black block uppercase tracking-widest flex items-center gap-2 py-1 font-mono">
+                <Scan size={12} /> Mode Operasi
               </label>
               <select 
                 value={scanMode} 
                 onChange={(e) => setScanMode(e.target.value)} 
-                className="w-full bg-black border-2 border-[#00ffff]/20 text-[10px] p-2 text-white outline-none focus:border-[#00ffff] font-mono cursor-pointer transition-colors"
+                className="w-full bg-black border-2 border-[#00ffff]/20 text-[12px] p-2 text-white outline-none focus:border-[#00ffff] font-mono cursor-pointer transition-colors"
               >
                 <option value="Upload_File">Upload_File (Manual_Input)</option>
                 <option value="Camera" disabled>Live_Camera (In_Development)</option>
@@ -169,7 +169,7 @@ const BarcodeScannerModule = ({ data }) => {
                 <div className="flex gap-2 h-[34px]">
                   <button 
                     onClick={() => fileInputRef.current.click()} 
-                    className={`flex-1 border-2 border-dashed text-[10px] font-black flex items-center justify-center gap-2 transition-all ${hasBuffer ? 'bg-[#00ffff]/20 border-[#00ffff] text-[#00ffff]' : 'bg-[#00ffff]/5 border-[#00ffff]/30 text-zinc-500 hover:border-[#00ffff]'}`}
+                    className={`flex-1 border-2 border-dashed text-[14px] font-black flex items-center justify-center gap-2 transition-all ${hasBuffer ? 'bg-[#00ffff]/20 border-[#00ffff] text-[#00ffff] font-mono' : 'bg-[#00ffff]/5 border-[#00ffff]/30 text-zinc-500 hover:border-[#00ffff]'}`}
                   >
                     <Folder size={14} />
                     <span>{hasBuffer ? 'Ganti_File' : 'Browse_PC'}</span>
@@ -188,7 +188,7 @@ const BarcodeScannerModule = ({ data }) => {
             <button 
               onClick={handleScan}
               disabled={isScanning || (!hasBuffer && scanMode === "Upload_File")}
-              className={`w-full py-2.5 border-2 font-black uppercase tracking-[0.2em] text-[11px] transition-all flex items-center justify-center gap-3 ${isScanning ? 'bg-zinc-800 border-zinc-700 text-zinc-500' : 'bg-[#00ffff] border-[#00ffff] text-black hover:brightness-110 shadow-[0_0_15px_rgba(0,255,255,0.3)]'}`}
+              className={`w-full py-1.5 border-2 font-black uppercase tracking-[0.2em] text-[15px] transition-all flex items-center justify-center  font-mono gap-3 ${isScanning ? 'bg-zinc-800 border-zinc-700 text-zinc-500' : 'bg-[#00ffff] border-[#00ffff] text-black hover:brightness-110 shadow-[0_0_15px_rgba(0,255,255,0.3)]'}`}
             >
               {isScanning ? <RefreshCw size={14} className="animate-spin" /> : <Scan size={14} />}
               <span>{isScanning ? 'Menganalisa...' : 'Mulai Scan Data'}</span>
@@ -201,7 +201,7 @@ const BarcodeScannerModule = ({ data }) => {
       <div className="flex-1 flex flex-col md:flex-row gap-10 min-h-[320px] mb-2 overflow-hidden pt-6">
         
         {/* Console Output (flex-1) */}
-        <div className="w-full lg:w-[10px] md:flex-1 border-2 border-[#00ffff]/20 bg-black/90 p-4 flex flex-col rounded-sm overflow-hidden text-left font-mono text-[11px] text-zinc-400 shadow-inner">
+        <div className="w-full lg:w-[10px] md:flex-1 border-2 border-[#00ffff]/20 bg-black/90 p-4 flex flex-col rounded-sm overflow-hidden text-left font-mono text-[14px] text-zinc-400 shadow-inner">
             <div className="flex justify-between items-center border-b border-[#00ffff]/10 pb-1.5 mb-2">
               <div className="flex items-center gap-3 text-[#00ffff] uppercase font-black">
                   <Activity size={12} className="animate-pulse" />
@@ -223,7 +223,7 @@ const BarcodeScannerModule = ({ data }) => {
         {/* Decoded Output (flex-1) - LEBIH LEBAR KE HORIZONTAL KANAN */}
         <div className="w-full lg:w-[1000px] md:flex-1 border-2 border-[#00ffff]/40 bg-zinc-950 flex flex-col rounded-sm relative overflow-hidden shadow-2xl min-w-0">
             {/* Header Area */}
-            <div className="flex items-center gap-3 text-[#00ffff] py-2 px-4 uppercase font-black border-b border-[#00ffff]/10 relative z-10 bg-zinc-900/50 shrink-0">
+            <div className="flex items-center gap-3 text-[#00ffff] py-2 px-4 uppercase font-black border-b border-[#00ffff]/10 relative z-10 bg-zinc-900/50 shrink-0 font-mono">
                 <Database size={12} />
                 <span>Decoded_Data_Stream</span>
                 <div className="ml-auto opacity-20">

@@ -185,7 +185,7 @@ export default function App() {
                   <div className={`mb-3 p-2 rounded-sm border transition-colors ${validIdx === i ? 'bg-[#00ffff] text-black border-[#00ffff]' : (isDarkMode ? 'bg-black/40 text-[#00ffff]/60 border-[#00ffff]/20' : 'bg-white/40 text-slate-400 border-slate-200')}`}>
                     <item.Icon size={72} />
                   </div>
-                  <h3 className={`text-[13px] font-black uppercase tracking-widest ${validIdx === i ? (isDarkMode ? 'text-white' : 'text-slate-900') : 'text-gray-400'}`}>{item.short}</h3>
+                  <h3 className={`text-[13px] font-black uppercase tracking-widest leading-none truncate ${validIdx === i ? (isDarkMode ? 'text-white' : 'text-slate-900') : 'text-gray-400'}`}>{item.title}</h3>
                   <div className="w-full h-[1px] bg-gradient-to-l from-blue-500/30 to-transparent mb-1" />
                   <motion.div onClick={(e) => { e.stopPropagation(); setActiveIdx(i); setView('terminal'); }} animate={{ x: validIdx === i ? 0 : 5, opacity: validIdx === i ? 1 : 0.4, color: validIdx === i ? '#00ffff' : '#4b5563' }} className="flex items-center space-x-1 text-[8px] font-bold pointer-events-auto mt-2">
                     <span className="text-[11px] uppercase tracking-tighter">Akses Berkas</span> <ChevronRight size={24} />

@@ -83,6 +83,11 @@ const PassportScannerModule = ({ data, activeTab: propActiveTab }) => {
     }
   }, [propActiveTab]);
 
+  // --- SINKRONISASI LOG KE SIDEBAR ---
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent('scanner:logs-sync', { detail: logs }));
+  }, [logs]);
+
   const addLog = (msg, type = "info") => {
     const timestamp = new Date().toLocaleTimeString();
     const prefix = type === "error" ? "[ERROR]" : type === "success" ? "[SUCCESS]" : "[INFO]";
@@ -389,15 +394,19 @@ const PassportScannerModule = ({ data, activeTab: propActiveTab }) => {
                     <Scan className="text-[#00ffff]" size={20} />
                  </div>
                  <div className="flex flex-col">
-                    <h3 className="text-[12px] font-black text-[#00ffff] uppercase tracking-[0.2em]">Passport OCR Display System</h3>
-                    <div className="flex items-center gap-2 mt-1">
+                    <h3 className="text-[15px] font-black text-[#00ffff] uppercase tracking-[0.2em] font-mono">Sistem Informasi OCR Passport</h3>
+                    {/* <div className="flex items-center gap-2 mt-1">
                        <button onClick={isCameraOpen ? stopCamera : openCamera} className={`flex items-center gap-2 px-4 py-1.5 rounded-sm text-[9px] font-black uppercase transition-all ${isCameraOpen ? 'bg-rose-500/20 text-rose-500 border border-rose-500' : 'bg-emerald-500/20 text-emerald-500 border border-emerald-500'}`}>
                           {isCameraOpen ? <CircleStop size={12} /> : <Video size={12} />}
                           {isCameraOpen ? 'Stop Camera' : 'Open Camera'}
                        </button>
-                    </div>
+                    </div> */}
                  </div>
               </div>
+              <button onClick={isCameraOpen ? stopCamera : openCamera} className={`flex items-center gap-2 px-4 py-1.5 rounded-sm text-[9px] font-black uppercase transition-all ${isCameraOpen ? 'bg-rose-500/20 text-rose-500 border border-rose-500' : 'bg-emerald-500/20 text-emerald-500 border border-emerald-500 font-mono'}`}>
+                {isCameraOpen ? <CircleStop size={12} /> : <Video size={12} />}
+                {isCameraOpen ? 'Stop Camera' : 'Open Camera'}
+              </button>
               <button onClick={handleTakeOCR} disabled={isProcessing || !isCameraOpen} className="px-8 py-2.5 bg-[#00ffff] text-black font-black text-[11px] uppercase tracking-widest flex items-center gap-3 hover:bg-[#00ffff]/80 transition-all active:scale-95 disabled:opacity-30 shadow-[0_0_15px_rgba(0,255,255,0.3)]">
                 {isProcessing ? <Loader2 size={16} className="animate-spin" /> : <Camera size={16} />}
                 {isProcessing ? 'Taking OCR...' : 'Take OCR'}
@@ -439,33 +448,33 @@ const PassportScannerModule = ({ data, activeTab: propActiveTab }) => {
             </div> */}
 
             <div className="flex-1 border-2 border-[#00ffff]/40 bg-zinc-900/60 p-6 relative rounded-sm flex flex-col shadow-2xl min-h-[160px]">
-              <div className="absolute -top-[12px] left-6 bg-white text-black px-4 py-0.5 text-[10px] font-black uppercase z-[50] shadow-md">
-                {activeTab === 'control' ? 'Intelligence Information System (T10K)' : 'Passport BAC Configuration Protocol'}
+              <div className="absolute -top-[12px] left-6 bg-white text-black px-4 py-0.5 text-[14px] font-black font-mono uppercase z-[50] shadow-md">
+                {activeTab === 'control' ? 'Sistem Informasi Passport' : 'Protokol Konfigurasi Passport BAC'}
               </div>
 
-              <div className="absolute -top-[14px] right-6 flex gap-2 z-[50]">
-                <button onClick={handleStartScanner} className={`flex items-center gap-2 px-4 py-1 text-[10px] font-black uppercase transition-all border-2 ${isScannerActive ? 'bg-emerald-500 text-black border-emerald-500 shadow-[0_0_10px_#10b981]' : 'bg-zinc-950 text-emerald-500 border-emerald-500 hover:bg-emerald-500/20'}`}><Power size={12} fill={isScannerActive ? "black" : "none"} />START</button>
-                <button onClick={handleStopScanner} className={`flex items-center gap-2 px-4 py-1 text-[10px] font-black uppercase transition-all border-2 ${!isScannerActive ? 'bg-rose-500 text-white border-rose-500' : 'bg-zinc-950 text-rose-500 border-rose-500 hover:bg-rose-500/20'}`}><CircleStop size={12} fill={!isScannerActive ? "white" : "none"} />STOP</button>
+              <div className="absolute -top-[14px] right-6 flex gap-2 z-[50] font-mono">
+                <button onClick={handleStartScanner} className={`flex items-center gap-2 px-4 py-1 text-[12px] font-black uppercase transition-all border-2 ${isScannerActive ? 'bg-emerald-500 text-black border-emerald-500 shadow-[0_0_2px_#10b981]' : 'bg-zinc-950 text-emerald-500 border-emerald-500 hover:bg-emerald-500/20'}`}><Power size={12} fill={isScannerActive ? "black" : "none"} />START</button>
+                <button onClick={handleStopScanner} className={`flex items-center gap-2 px-4 py-1 text-[12px] font-black uppercase transition-all border-2 ${!isScannerActive ? 'bg-rose-500 text-white border-rose-500' : 'bg-zinc-950 text-rose-500 border-rose-500 hover:bg-rose-500/20'}`}><CircleStop size={12} fill={!isScannerActive ? "white" : "none"} />STOP</button>
               </div>
               
-              <div className="flex flex-col md:flex-row items-end gap-6 text-left font-mono w-full mb-auto transition-all duration-300 pt-4">
+              <div className="flex flex-col md:flex-row items-end gap-6 text-left font-mono w-full mb-auto transition-all duration-300 pt-2">
                 {activeTab === 'control' ? (
-                  <div className="flex-1 pb-4"><p className={`text-[11px] font-bold uppercase ${isScannerActive ? 'text-emerald-400' : 'text-zinc-600'}`}>{isScannerActive ? '[SIGNAL_READY]: Sistem siap untuk ekstraksi Intelligent Control T10K...' : '[OFFLINE]: Sistem tidak aktif. Tekan START untuk memulai.'}</p></div>
+                  <div className="flex-1 pb-4"><p className={`text-[12px] font-bold uppercase ${isScannerActive ? 'text-emerald-400' : 'text-zinc-600'}`}>{isScannerActive ? '[SIGNAL_READY]: Sistem siap untuk ekstraksi Intelligent Control T10K...' : '[OFFLINE]: Sistem tidak aktif. Tekan START untuk memulai.'}</p></div>
                 ) : (
                   <>
-                    <div className="flex-1 space-y-2"><label className="text-[9px] text-[#00ffff]/60 font-black flex items-center gap-2 uppercase"><FileText size={12} /> Doc Number</label><input type="text" disabled={!isScannerActive} value={bacData.docNumber} onChange={(e) => setBacData({...bacData, docNumber: e.target.value})} placeholder="X12345678" className="w-full bg-black border border-[#00ffff]/20 h-11 px-4 text-[11px] text-white outline-none focus:border-[#00ffff]/60" /></div>
-                    <div className="w-full md:w-48 space-y-2"><label className="text-[9px] text-[#00ffff]/60 font-black flex items-center gap-2 uppercase"><Fingerprint size={12} /> Birth</label><input type="text" maxLength={6} disabled={!isScannerActive} value={bacData.birthDate} onChange={(e) => setBacData({...bacData, birthDate: e.target.value})} placeholder="YYMMDD" className="w-full bg-black border border-[#00ffff]/20 h-11 px-4 text-[11px] text-white text-center" /></div>
-                    <div className="w-full md:w-48 space-y-2"><label className="text-[9px] text-[#00ffff]/60 font-black flex items-center gap-2 uppercase"><ShieldCheck size={12} /> Expiry</label><input type="text" maxLength={6} disabled={!isScannerActive} value={bacData.expiryDate} onChange={(e) => setBacData({...bacData, expiryDate: e.target.value})} placeholder="YYMMDD" className="w-full bg-black border border-[#00ffff]/20 h-11 px-4 text-[11px] text-white text-center" /></div>
+                    <div className="flex-1 space-y-2"><label className="text-[14px] text-[#00ffff]/60 font-black flex items-center gap-2 uppercase"><FileText size={12} /> Doc Number</label><input type="text" disabled={!isScannerActive} value={bacData.docNumber} onChange={(e) => setBacData({...bacData, docNumber: e.target.value})} placeholder="X12345678" className="w-full bg-black border border-[#00ffff]/20 h-9 px-4 text-[12px] text-white outline-none focus:border-[#00ffff]/60 font-mono" /></div>
+                    <div className="w-full md:w-48 space-y-2"><label className="text-[14px] text-[#00ffff]/60 font-black flex items-center gap-2 uppercase"><Fingerprint size={12} /> Birth</label><input type="text" maxLength={6} disabled={!isScannerActive} value={bacData.birthDate} onChange={(e) => setBacData({...bacData, birthDate: e.target.value})} placeholder="YYMMDD" className="w-full bg-black border border-[#00ffff]/20 h-9 px-4 text-[12px] text-white text-center font-mono" /></div>
+                    <div className="w-full md:w-48 space-y-2"><label className="text-[14px] text-[#00ffff]/60 font-black flex items-center gap-2 uppercase"><ShieldCheck size={12} /> Expiry</label><input type="text" maxLength={6} disabled={!isScannerActive} value={bacData.expiryDate} onChange={(e) => setBacData({...bacData, expiryDate: e.target.value})} placeholder="YYMMDD" className="w-full bg-black border border-[#00ffff]/20 h-9 px-4 text-[12px] text-white text-center font-mono" /></div>
                   </>
                 )}
               </div>
 
-              <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-3 font-mono">
                  {activeTab === 'control' ? (
                    <>
-                     <button onClick={handleShowImagesT10K} disabled={isProcessing || !isScannerActive} className="py-2.5 font-black text-[10px] uppercase transition-all flex items-center justify-center gap-2 rounded-sm border-2 bg-zinc-950 text-emerald-500 border-emerald-500 hover:bg-emerald-500/10 active:scale-95 disabled:opacity-20"><Camera size={14} /> GET IMAGES</button>
-                     <button onClick={handleGetMrzT10K} disabled={isProcessing || !isScannerActive} className="py-2.5 font-black text-[10px] uppercase transition-all flex items-center justify-center gap-2 rounded-sm border-2 bg-zinc-950 text-emerald-500 border-emerald-500 hover:bg-emerald-500/10 active:scale-95 disabled:opacity-20"><Scan size={14} /> GET MRZ INFO</button>
-                     <button onClick={handleGetDgT10K} disabled={isProcessing || !isScannerActive} className="py-2.5 font-black text-[10px] uppercase transition-all flex items-center justify-center gap-2 rounded-sm border-2 bg-zinc-950 text-emerald-500 border-emerald-500 hover:bg-emerald-500/10 active:scale-95 disabled:opacity-20"><Database size={14} /> GET DG INFO</button>
+                     <button onClick={handleShowImagesT10K} disabled={isProcessing || !isScannerActive} className="py-2.5 font-black text-[12px] uppercase transition-all flex items-center justify-center gap-2 rounded-sm border-2 bg-zinc-950 text-emerald-500 border-emerald-500 hover:bg-emerald-500/10 active:scale-95 disabled:opacity-20"><Camera size={14} /> GET IMAGES</button>
+                     <button onClick={handleGetMrzT10K} disabled={isProcessing || !isScannerActive} className="py-2.5 font-black text-[12px] uppercase transition-all flex items-center justify-center gap-2 rounded-sm border-2 bg-zinc-950 text-emerald-500 border-emerald-500 hover:bg-emerald-500/10 active:scale-95 disabled:opacity-20"><Scan size={14} /> GET MRZ INFO</button>
+                     <button onClick={handleGetDgT10K} disabled={isProcessing || !isScannerActive} className="py-2.5 font-black text-[12px] uppercase transition-all flex items-center justify-center gap-2 rounded-sm border-2 bg-zinc-950 text-emerald-500 border-emerald-500 hover:bg-emerald-500/10 active:scale-95 disabled:opacity-20"><Database size={14} /> GET DG INFO</button>
                    </>
                  ) : activeTab === 'reader' && (
                    <>
@@ -486,13 +495,13 @@ const PassportScannerModule = ({ data, activeTab: propActiveTab }) => {
 
           <div className="flex-1 border-2 border-[#00ffff]/40 bg-zinc-950 flex flex-col rounded-sm relative shadow-2xl min-h-[400px]">
               {activeTab === 'control' && (
-                <div className="flex bg-zinc-900/80 border-b border-[#00ffff]/20 shrink-0">
+                <div className="flex bg-zinc-900/80 border-b border-[#00ffff]/20 shrink-0 font-mono">
                   {[
                     { id: 'image', label: 'T10K Images Capture', icon: ImageIcon },
                     { id: 'mrz', label: 'T10K MRZ Result', icon: TerminalIcon },
                     { id: 'dg', label: 'T10K DG (NFC) Result', icon: Cpu }
                   ].map((t) => (
-                    <button key={t.id} onClick={() => setOutputTab(t.id)} className={`flex-1 flex items-center justify-center gap-3 py-4 text-[10px] font-black uppercase transition-all border-r border-[#00ffff]/10 ${outputTab === t.id ? 'bg-[#00ffff] text-black shadow-[inset_0_0_15px_rgba(0,0,0,0.2)]' : 'text-zinc-500 hover:text-[#00ffff] hover:bg-zinc-800'}`}>
+                    <button key={t.id} onClick={() => setOutputTab(t.id)} className={`flex-1 flex items-center justify-center gap-3 py-2 text-[13px] font-black uppercase transition-all border-r border-[#00ffff]/10 ${outputTab === t.id ? 'bg-[#00ffff] text-black shadow-[inset_0_0_15px_rgba(0,0,0,0.2)]' : 'text-zinc-500 hover:text-[#00ffff] hover:bg-zinc-800'}`}>
                       <t.icon size={14} /> {t.label}
                     </button>
                   ))}
@@ -525,7 +534,7 @@ const PassportScannerModule = ({ data, activeTab: propActiveTab }) => {
                         </div>
                       ) : (
                         <>
-                          <div className="flex items-center gap-3 mb-4 border-b border-[#00ffff]/20 pb-3"><TerminalIcon size={18} className="text-[#00ffff] animate-pulse" /><span className="text-[11px] font-black text-[#00ffff] uppercase tracking-widest">NFC_Reader_Output_Stream</span></div>
+                          <div className="flex items-center gap-3 mb-4 border-b border-[#00ffff]/20 pb-3"><TerminalIcon size={18} className="text-[#00ffff] animate-pulse" /><span className="text-[15px] font-black text-[#00ffff] uppercase tracking-widest font-mono">Logs Output</span></div>
                           <div className="flex-1 bg-black/60 border border-[#00ffff]/10 rounded-sm overflow-y-auto custom-scrollbar font-mono shadow-inner p-5"><pre className="text-emerald-400 text-[14px] leading-relaxed">{readerOutput || `[WAITING]: Awaiting NFC BAC authentication...`}{readerOutput && <span className="animate-pulse">_</span>}</pre></div>
                         </>
                       )}

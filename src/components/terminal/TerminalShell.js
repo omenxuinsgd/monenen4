@@ -78,7 +78,7 @@ const TerminalShell = ({
           {/* BANNER JUDUL (ARCADE CLASSIC FONT) */}
           <div className="relative py-2 px-10 mt-0.5 border-2 border-t-6 border-[#00ffff]/20 bg-gradient-to-r from-[#00ffff]/5 to-transparent rounded-sm overflow-hidden shrink-0">
             <h2 className="text-4xl tracking-[0.05em] font-arcade leading-none uppercase banner-title truncate">
-              {`> ${shortTitle}`} Scanner
+              {`> ${shortTitle}`}
             </h2>
             <Terminal size={120} className="absolute right-[-20px] top-[-20px] text-[#00ffff] opacity-5 -rotate-12" />
           </div>

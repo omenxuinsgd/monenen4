@@ -50,7 +50,7 @@ const TerminalView = (props) => {
   const isOCR = shortText.includes("OCR");
   const isSignPad = shortText.includes("SIGN");
   const isFingerprint = shortText.includes("FINGERPRINT");
-  const isDocScanner = shortText.includes("DOKUMEN SCANNER") || shortText.includes("DOCUMENT");
+  const isDocScanner = shortText.includes("DOKUMEN");
   const isPassportScanner = shortText.includes("PASSPORT");
   const isFaceRecognition = shortText.includes("FACE");
   const isPalmVein = shortText.includes("PALM"); 
@@ -207,8 +207,12 @@ const TerminalView = (props) => {
           { id: 'passport_ocr', label: 'OCR Extraction', type: 'ocr' }
         ]
         : isPrinter 
-              ? [{ id: 'text_barcode', label: 'Text & Barcode', type: 'enroll' }, { id: 'sample', label: 'Sample', type: 'verify' }]
-              : [{ id: 'enrollment', label: 'Enrollment', type: 'enroll' }, { id: 'verification', label: 'Verification', type: 'verify' }];
+              ? [{ id: 'text_barcode', label: 'Text & Barcode', type: 'enroll' }]
+              : isDocScanner
+                ? [{ id: 'doc_scanner', label: 'Document Control', type: 'enroll' }]
+                : isOCR
+                  ? [{ id: 'ocr_scanner', label: 'OCR Scanner', type: 'enroll' }]
+                  : [{ id: 'enrollment', label: 'Enrollment', type: 'enroll' }, { id: 'verification', label: 'Verification', type: 'verify' }];
 
   const [activeTab, setActiveTab] = useState(tabs[0]?.id || "");
 
@@ -262,10 +266,10 @@ const TerminalView = (props) => {
 
       {/* Path Navigation (Breadcrumbs) */}
       <div className="flex h-8 w-fit font-mono text-[9px] uppercase tracking-tighter items-stretch mb-6 shrink-0 font-black">
-          <div className="flex items-center px-4 pr-8 bg-[#178282] text-white path-arrow-start shadow-lg"><Home size={12} strokeWidth={2.5} /></div>
+          <div className="flex items-center px-4 pr-8 bg-[#178282] text-white path-arrow-start shadow-lg"><Home size={14} strokeWidth={2.5} /></div>
           <div className="flex items-center pl-9 pr-10 bg-[#082e2e] text-[#00ffff]/90 relative -ml-[18px] path-arrow-end border-y border-[#00ffff]/10 border-r border-[#00ffff]/20">
-            <FolderOpen size={10} className="mr-2 opacity-60" />
-            <span>{shortTitle.toLowerCase()}</span>
+            <FolderOpen size={14} className="mr-2 opacity-60" />
+            <span className='text-[12px]'>{shortTitle.toLowerCase()}</span>
           </div>
       </div>
 
