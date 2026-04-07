@@ -115,6 +115,12 @@ const SignPadModule = ({ data }) => {
     return () => window.removeEventListener('signpad:capture-complete', handleCaptureComplete);
   }, [regData]); 
 
+  // --- SINKRONISASI LOG KE SIDEBAR ---
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent('scanner:logs-sync', { detail: logs }));
+  }, [logs]);
+  
+
   const addLog = (msg, type = 'info') => {
     const timestamp = new Date().toLocaleTimeString();
     const prefix = type === 'error' ? '[ERROR]' : type === 'success' ? '[SUCCESS]' : '[INFO]';
@@ -167,38 +173,38 @@ const SignPadModule = ({ data }) => {
           <span className="text-[8px] text-[#00ffff]/40 font-bold uppercase tracking-[0.3em]">Sign_Buffer_v1</span>
         </div> */}
 
-        <div className="flex-1 border-2 border-[#00ffff]/40 bg-zinc-900/60 p-5 relative rounded-sm flex flex-col shadow-2xl min-h-[160px]">
-          <div className="absolute -top-[12px] left-6 bg-white text-black px-4 py-0.5 text-[10px] font-black uppercase z-[50]">Registrasi Data User</div>
-          <div className="grid grid-cols-3 gap-x-4 text-left font-mono">
+        <div className="flex-1 border-2 border-[#00ffff]/40 bg-zinc-900/60 p-5 relative rounded-sm flex font-mono flex-col shadow-2xl min-h-[160px]">
+          <div className="absolute -top-[12px] left-6 bg-white text-black px-4 py-0.5 text-[16px] font-black uppercase z-[50]">Registrasi Data User</div>
+          <div className="grid grid-cols-3 gap-x-4 text-left font-mono py-4">
             <div className="space-y-1">
-              <label className="text-[8px] text-[#00ffff]/60 uppercase font-black tracking-widest flex items-center gap-1"><IdCard size={10} /> User_ID / NIK</label>
-              <input disabled={isDataSaved || isApiLoading} type="text" value={regData.userId} onChange={(e) => setRegData({...regData, userId: e.target.value})} placeholder="ID Number..." className={`w-full bg-black border border-[#00ffff]/20 p-2 text-[10px] text-[#00ffff] outline-none focus:border-[#00ffff]/60 transition-all ${isDataSaved ? 'opacity-40' : ''}`} />
+              <label className="text-[12px] text-[#00ffff]/60 uppercase font-black tracking-widest flex items-center gap-1"><IdCard size={14} /> User_ID / NIK</label>
+              <input disabled={isDataSaved || isApiLoading} type="text" value={regData.userId} onChange={(e) => setRegData({...regData, userId: e.target.value})} placeholder="ID Number..." className={`w-full bg-black border border-[#00ffff]/20 p-2 text-[14px] text-[#00ffff] outline-none focus:border-[#00ffff]/60 transition-all ${isDataSaved ? 'opacity-40' : ''}`} />
             </div>
             <div className="space-y-1">
-              <label className="text-[8px] text-[#00ffff]/60 uppercase font-black tracking-widest flex items-center gap-1"><User size={10} /> Full_Name</label>
-              <input disabled={isDataSaved || isApiLoading} type="text" value={regData.fullName} onChange={(e) => setRegData({...regData, fullName: e.target.value})} placeholder="Name..." className={`w-full bg-black border border-[#00ffff]/20 p-2 text-[10px] text-white outline-none focus:border-[#00ffff]/60 uppercase transition-all ${isDataSaved ? 'opacity-40' : ''}`} />
+              <label className="text-[12px] text-[#00ffff]/60 uppercase font-black tracking-widest flex items-center gap-1"><User size={14} /> Full_Name</label>
+              <input disabled={isDataSaved || isApiLoading} type="text" value={regData.fullName} onChange={(e) => setRegData({...regData, fullName: e.target.value})} placeholder="Name..." className={`w-full bg-black border border-[#00ffff]/20 p-2 text-[14px] text-white outline-none focus:border-[#00ffff]/60 uppercase transition-all ${isDataSaved ? 'opacity-40' : ''}`} />
             </div>
             <div className="space-y-1">
-              <label className="text-[8px] text-[#00ffff]/60 uppercase font-black tracking-widest flex items-center gap-1"><MapPin size={10} /> Address</label>
-              <input disabled={isDataSaved || isApiLoading} type="text" value={regData.address} onChange={(e) => setRegData({...regData, address: e.target.value})} placeholder="Street..." className={`w-full bg-black border border-[#00ffff]/20 p-2 text-[10px] text-zinc-400 outline-none focus:border-[#00ffff]/60 transition-all ${isDataSaved ? 'opacity-40' : ''}`} />
+              <label className="text-[12px] text-[#00ffff]/60 uppercase font-black tracking-widest flex items-center gap-1"><MapPin size={14} /> Address</label>
+              <input disabled={isDataSaved || isApiLoading} type="text" value={regData.address} onChange={(e) => setRegData({...regData, address: e.target.value})} placeholder="Street..." className={`w-full bg-black border border-[#00ffff]/20 p-2 text-[14px] text-zinc-400 outline-none focus:border-[#00ffff]/60 transition-all ${isDataSaved ? 'opacity-40' : ''}`} />
             </div>
           </div>
           <div className="mt-auto pt-3 flex gap-4">
-             <button onClick={handleRegister} disabled={isDataSaved || isApiLoading} className={`flex-1 py-1.5 font-black text-[9px] uppercase tracking-widest transition-all flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(0,255,255,0.2)] ${!isDataSaved && !isApiLoading ? 'bg-[#00ffff] text-black hover:brightness-110 active:scale-95' : 'bg-zinc-800 text-zinc-600 border border-zinc-700 cursor-not-allowed'}`}>
+             <button onClick={handleRegister} disabled={isDataSaved || isApiLoading} className={`flex-1 py-1.5 font-black text-[16px] uppercase tracking-widest transition-all flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(0,255,255,0.2)] ${!isDataSaved && !isApiLoading ? 'bg-[#00ffff] text-black hover:brightness-110 active:scale-95' : 'bg-zinc-800 text-zinc-600 border border-zinc-700 cursor-not-allowed'}`}>
                 {isApiLoading ? <Loader2 size={10} className="animate-spin" /> : <Send size={10} />} 
                 {isDataSaved ? "WAITING_SIGNATURE" : "Simpan Data"}
              </button>
-             <button disabled={isApiLoading} onClick={handleResetAll} className="px-6 py-1.5 border border-red-500/40 text-red-500 text-[9px] font-black uppercase hover:bg-red-500/10 transition-all active:scale-95">Reset</button>
+             <button disabled={isApiLoading} onClick={handleResetAll} className="px-6 py-1.5 border border-red-500/40 text-red-500 text-[16px] font-black uppercase hover:bg-red-500/10 transition-all active:scale-95">Reset</button>
           </div>
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col md:flex-row gap-6 min-h-[300px] mb-2 overflow-hidden">
-        <div className="md:flex-[1] border-2 border-[#00ffff]/20 bg-black/90 p-4 flex flex-col rounded-sm text-left font-mono text-[10px] text-zinc-400 shadow-inner overflow-hidden">
+      <div className="flex-1 flex flex-col md:flex-row gap-6 min-h-[300px] mb-2 overflow-hidden font-mono">
+        {/* <div className="md:flex-[1] border-2 border-[#00ffff]/20 bg-black/90 p-4 flex flex-col rounded-sm text-left font-mono text-zinc-400 shadow-inner overflow-hidden">
             <div className="flex justify-between items-center border-b border-[#00ffff]/10 pb-1.5 mb-2">
-              <div className="flex items-center gap-2 text-[#00ffff] uppercase font-black"><Activity size={12} className="animate-pulse" /><span>Biometric_Console</span></div>
+              <div className="flex items-center gap-2 text-[#00ffff] uppercase font-black text-[16px]"><Activity size={12} className="animate-pulse" /><span>Biometric_Console</span></div>
             </div>
-            <div className="flex-1 overflow-y-auto custom-scrollbar space-y-1">
+            <div className="flex-1 overflow-y-auto custom-scrollbar space-y-1 text-[12px]">
               {logs.map((l, i) => (
                   <div key={i} className={`flex gap-3 leading-tight ${l.includes('[SUCCESS]') ? 'text-emerald-400' : l.includes('[ERROR]') ? 'text-red-400' : ''}`}>
                     <span className="opacity-20 shrink-0 font-bold">{(logs.length - i).toString().padStart(2, '0')}</span>
@@ -206,7 +212,7 @@ const SignPadModule = ({ data }) => {
                   </div>
               ))}
             </div>
-        </div>
+        </div> */}
 
         <div className="md:flex-[2.5] border-2 border-[#00ffff]/40 bg-zinc-950 flex flex-col rounded-sm relative overflow-hidden shadow-2xl">
             <div className="flex items-center gap-3 text-[#00ffff] py-2 px-4 uppercase font-black border-b border-[#00ffff]/10 bg-zinc-900/50 shrink-0">
@@ -216,7 +222,7 @@ const SignPadModule = ({ data }) => {
             </div>
             
             <div className="flex-1 overflow-x-auto custom-scrollbar p-2 bg-black/40">
-                 <table className="w-full text-left font-mono text-[10px] border-collapse">
+                 <table className="w-full text-left font-mono text-[12px] border-collapse">
                     <thead>
                         <tr className="text-zinc-500 border-b border-[#00ffff]/10">
                             <th className="py-2 px-3 uppercase font-black tracking-widest">UserID</th>

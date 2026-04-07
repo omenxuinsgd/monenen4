@@ -373,7 +373,7 @@ const FingerprintModule = ({ data, activeTab }) => {
             ))}
           </div>
           
-          <div className="flex items-center gap-2 mt-2">
+          <div className="flex items-center gap-2 mt-2 font-mono">
             <button onClick={async () => {
               const res = await handleAction('/api/fingerprint/startcapture', { mode: parseInt(mode), nMissingFinger: 0 });
               if (res.success) setIsCapturing(true);
@@ -431,36 +431,36 @@ const FingerprintModule = ({ data, activeTab }) => {
         )}
       </AnimatePresence>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch shrink-0">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch shrink-0 font-mono">
 
         <div className="lg:col-span-7 border-2 border-[#00ffff]/20 bg-zinc-950/80 relative rounded-sm text-left shadow-lg flex flex-col">
-          <div className="absolute -top-[12px] left-5 bg-white text-black px-3 py-0.5 text-[9px] font-black uppercase tracking-widest z-[50]">Registrasi_Data_User</div>
+          <div className="absolute -top-[12px] left-5 bg-white text-black px-3 py-0.5 text-[14px] font-black uppercase tracking-widest z-[50]">Registrasi_Data_User</div>
           <div className="absolute -top-[15px] right-5 z-[60]">
              <button onClick={async () => {
                 const endpoint = !isConnected ? '/api/fingerprint/opendevice' : '/api/fingerprint/closedevice';
                 const res = await handleAction(endpoint);
                 if (res.success) setIsConnected(!isConnected);
-              }} className={`px-3 py-1.5 border-2 text-[8px] font-black uppercase transition-all flex items-center gap-2 shadow-lg ${isConnected ? 'bg-rose-500 border-rose-500 text-white' : 'bg-[#00ffff] border-[#00ffff] text-black hover:bg-white'}`}><Power size={10} /> {isConnected ? 'Disconnect' : 'Connect Device'}</button>
+              }} className={`px-3 py-1 border-2 text-[11px] font-black uppercase transition-all flex items-center gap-2 shadow-lg ${isConnected ? 'bg-rose-500 border-rose-500 text-white' : 'bg-[#00ffff] border-[#00ffff] text-black hover:bg-white'}`}><Power size={12} /> {isConnected ? 'Disconnect' : 'Connect Device'}</button>
           </div>
           
           <div className="flex-1 p-5 pt-8 flex flex-col justify-between">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-[8px] text-[#00ffff]/60 font-black uppercase tracking-widest ml-1 flex items-center gap-1"><IdCard size={10}/> User ID / NIK</label>
-                <input disabled={isDataSaved} value={nik} onChange={(e) => setNik(e.target.value)} placeholder="NIK..." className="w-full bg-black/40 border-2 border-[#00ffff]/10 focus:border-[#00ffff] text-[11px] p-2.5 text-[#00ffff] outline-none rounded-sm uppercase font-mono shadow-inner" />
+                <label className="text-[14px] text-[#00ffff]/60 font-black uppercase tracking-widest ml-1 flex items-center gap-1"><IdCard size={10}/> User ID / NIK</label>
+                <input disabled={isDataSaved} value={nik} onChange={(e) => setNik(e.target.value)} placeholder="NIK..." className="w-full bg-black/40 border-2 border-[#00ffff]/10 focus:border-[#00ffff] text-[14px] p-2.5 text-[#00ffff] outline-none rounded-sm uppercase font-mono shadow-inner" />
               </div>
               <div className="space-y-1">
-                <label className="text-[8px] text-[#00ffff]/60 font-black uppercase tracking-widest ml-1 flex items-center gap-1"><User size={10}/> Full Name</label>
-                <input disabled={isDataSaved} value={userName} onChange={(e) => setUserName(e.target.value)} placeholder="NAME..." className="w-full bg-black/40 border-2 border-[#00ffff]/10 focus:border-[#00ffff] text-[11px] p-2.5 text-white outline-none rounded-sm uppercase font-mono shadow-inner" />
+                <label className="text-[14px] text-[#00ffff]/60 font-black uppercase tracking-widest ml-1 flex items-center gap-1"><User size={10}/> Full Name</label>
+                <input disabled={isDataSaved} value={userName} onChange={(e) => setUserName(e.target.value)} placeholder="NAME..." className="w-full bg-black/40 border-2 border-[#00ffff]/10 focus:border-[#00ffff] text-[14px] p-2.5 text-white outline-none rounded-sm uppercase font-mono shadow-inner" />
               </div>
               <div className="col-span-2 space-y-1">
-                <label className="text-[8px] text-[#00ffff]/60 font-black uppercase tracking-widest ml-1 flex items-center gap-1"><MapPin size={10}/> Address</label>
-                <input disabled={isDataSaved} value={address} onChange={(e) => setAddress(e.target.value)} placeholder="ADDRESS..." className="w-full bg-black/40 border-2 border-[#00ffff]/10 focus:border-[#00ffff] text-[11px] p-2.5 text-zinc-400 outline-none rounded-sm uppercase font-mono shadow-inner" />
+                <label className="text-[14px] text-[#00ffff]/60 font-black uppercase tracking-widest ml-1 flex items-center gap-1"><MapPin size={10}/> Address</label>
+                <input disabled={isDataSaved} value={address} onChange={(e) => setAddress(e.target.value)} placeholder="ADDRESS..." className="w-full bg-black/40 border-2 border-[#00ffff]/10 focus:border-[#00ffff] text-[14px] p-2.5 text-zinc-400 outline-none rounded-sm uppercase font-mono shadow-inner" />
               </div>
             </div>
             
             <div className="flex gap-3 mt-6">
-              <button onClick={handleSaveUserData} disabled={isDataSaved || isLoading} className={`flex-1 py-3 border-2 font-black text-[10px] uppercase tracking-widest transition-all rounded-sm flex items-center justify-center gap-2 ${!isDataSaved ? 'bg-[#00ffff]/10 border-[#00ffff] text-[#00ffff] hover:bg-[#00ffff] hover:text-black' : 'bg-zinc-900 border-zinc-800 text-zinc-600'}`}>{isLoading ? <Loader2 size={12} className="animate-spin"/> : isDataSaved ? <Lock size={12}/> : <Send size={12}/>} {isDataSaved ? "DATA_TERKUNCI" : "Simpan Data User"}</button>
+              <button onClick={handleSaveUserData} disabled={isDataSaved || isLoading} className={`flex-1 py-3 border-2 font-black text-[14px] uppercase tracking-widest transition-all rounded-sm flex items-center justify-center gap-2 ${!isDataSaved ? 'bg-[#00ffff]/10 border-[#00ffff] text-[#00ffff] hover:bg-[#00ffff] hover:text-black' : 'bg-zinc-900 border-zinc-800 text-zinc-600'}`}>{isLoading ? <Loader2 size={12} className="animate-spin"/> : isDataSaved ? <Lock size={12}/> : <Send size={12}/>} {isDataSaved ? "DATA_TERKUNCI" : "Simpan Data User"}</button>
               {isDataSaved && (
                 <>
                   <button onClick={() => loadFingerprintImagesFromDb(nik)} disabled={isLoadingDbImages} className="px-5 py-3 border-2 border-[#00ffff]/30 text-[#00ffff] text-[10px] font-black hover:bg-[#00ffff] hover:text-black uppercase transition-all rounded-sm"><RefreshCw size={12} className={isLoadingDbImages ? "animate-spin" : ""}/></button>
@@ -472,26 +472,26 @@ const FingerprintModule = ({ data, activeTab }) => {
         </div>
 
         <div className="lg:col-span-5 border-2 border-[#00ffff]/30 bg-zinc-900/60 relative rounded-sm flex flex-col justify-between shadow-xl min-h-[220px]">
-          <div className="absolute -top-[12px] left-5 bg-white text-black px-3 py-0.5 text-[9px] font-black uppercase tracking-widest z-[50]">Capture Control</div>
+          <div className="absolute -top-[12px] left-5 bg-white text-black px-3 py-0.5 text-[14px] font-black font-mono uppercase tracking-widest z-[50]">Capture Control</div>
           
           <div className="flex flex-col gap-4 p-5 mt-3 flex-1">
             <div className="space-y-3">
-              <label className="text-[9px] text-[#00ffff] font-black uppercase tracking-[0.2em] block flex items-center gap-2">
+              <label className="text-[12px] text-[#00ffff] font-black uppercase tracking-[0.2em] block flex items-center gap-2">
                 <Target size={12}/> Pilih Mode Capture
               </label>
               
               <div className="grid grid-cols-3 gap-2">
                 {CAPTURE_MODES.map((m) => (
                   <button key={m.id} disabled={isEnrolling} onClick={() => setMode(m.id)} className={`relative flex flex-col items-center justify-center p-2 border-2 rounded-sm transition-all group overflow-hidden ${mode === m.id ? 'bg-[#00ffff] border-[#00ffff] text-black shadow-[0_0_15px_#00ffff66]' : 'bg-black/60 border-white/10 text-[#00ffff]/40 hover:border-[#00ffff]/40 hover:text-[#00ffff]'}`}>
-                    <span className="text-[9px] font-black z-10">{m.label}</span>
-                    <span className={`text-[6px] uppercase z-10 font-bold ${mode === m.id ? 'text-black/60' : 'opacity-40'}`}>{m.detail}</span>
+                    <span className="text-[16px] font-black z-10">{m.label}</span>
+                    <span className={`text-[12px] uppercase z-10 font-bold ${mode === m.id ? 'text-black/60' : 'opacity-40'}`}>{m.detail}</span>
                     {mode === m.id && <motion.div layoutId="activeMode" className="absolute inset-0 bg-[#00ffff] z-0" />}
                   </button>
                 ))}
               </div>
             </div>
 
-            <label className="text-[9px] text-[#00ffff] font-black uppercase tracking-[0.2em] block flex items-center gap-2">
+            <label className="text-[12px] text-[#00ffff] font-black uppercase tracking-[0.2em] block flex items-center gap-2">
                 <Target size={12}/> Jalankan Device & Enrollment
             </label>
 

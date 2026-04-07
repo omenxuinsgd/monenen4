@@ -212,7 +212,11 @@ const TerminalView = (props) => {
                 ? [{ id: 'doc_scanner', label: 'Document Control', type: 'enroll' }]
                 : isOCR
                   ? [{ id: 'ocr_scanner', label: 'OCR Scanner', type: 'enroll' }]
-                  : [{ id: 'enrollment', label: 'Enrollment', type: 'enroll' }, { id: 'verification', label: 'Verification', type: 'verify' }];
+                  : isSignPad
+                    ? [{ id: 'sign_pad', label: 'Signature Pad', type: 'enroll' }]
+                    : isBarcode
+                      ? [{ id: 'barcode_scanner', label: 'Barcode Scanner', type: 'enroll' }]
+                      : [{ id: 'enrollment', label: 'Enrollment', type: 'enroll' }, { id: 'verification', label: 'Verification', type: 'verify' }];
 
   const [activeTab, setActiveTab] = useState(tabs[0]?.id || "");
 
@@ -334,7 +338,7 @@ const TerminalView = (props) => {
 
       {/* DEVICE CONSOLE OUTPUT (Scrollable with Fixed Max Height) */}
             <div className="w-full border-2 border-[#00ffff]/40 bg-zinc-950 rounded-sm relative overflow-hidden flex flex-col min-h-[160px] max-h-[300px] shadow-2xl flex-1">
-               {(isDocScanner || isPassportScanner || isFaceRecognition) ? (
+               {(isDocScanner || isPassportScanner || isFaceRecognition || isSignPad) ? (
                  <div className="p-3 flex flex-col flex-1 overflow-hidden">
                     <div className="flex items-center justify-between border-b border-[#00ffff]/20 pb-2 mb-2 shrink-0">
                        <div className="flex items-center gap-2 text-[#00ffff] font-black uppercase text-[14px]">
