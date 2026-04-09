@@ -222,7 +222,7 @@ const TerminalView = (props) => {
 
   // --- 6. RENDER SIDEBAR (KOLOM KIRI) ---
   const LeftColumn = (
-    <div className="w-[610px] flex flex-col items-start shrink-0 h-full max-h-screen overflow-hidden font-mono text-left" suppressHydrationWarning>
+    <div className="md:w-[500px] flex flex-col items-start shrink-0 h-full max-h-screen overflow-hidden font-mono text-left" suppressHydrationWarning>
       
       {/* AREA VISUAL UTAMA */}
       <div className="relative w-full aspect-square border-2 border-[#00ffff]/40 bg-black overflow-hidden rounded-sm mb-4 shadow-lg shrink-0 group">
@@ -337,7 +337,7 @@ const TerminalView = (props) => {
       </div> */}
 
       {/* DEVICE CONSOLE OUTPUT (Scrollable with Fixed Max Height) */}
-            <div className="w-full border-2 border-[#00ffff]/40 bg-zinc-950 rounded-sm relative overflow-hidden flex flex-col min-h-[160px] max-h-[300px] shadow-2xl flex-1">
+            <div className="w-full border-2 border-[#00ffff]/40 bg-zinc-950 rounded-sm relative overflow-hidden flex flex-col md:min-h-[10px] max-h-[300px] shadow-2xl flex-1">
                {(isDocScanner || isPassportScanner || isFaceRecognition || isSignPad || isFingerprint || isOCR) ? (
                  <div className="p-3 flex flex-col flex-1 overflow-hidden">
                     <div className="flex items-center justify-between border-b border-[#00ffff]/20 pb-2 mb-2 shrink-0">
