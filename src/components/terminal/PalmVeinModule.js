@@ -26,7 +26,7 @@ import {
  * FIX: Menggunakan Ref untuk status scanning guna mengelakkan stale closure pada event listener.
  */
 const PalmVeinModule = ({ activeTab }) => {
-  const baseUrl = "http://localhost:5000";
+  const baseUrl = "http://localhost:5160";
   
   const [logs, setLogs] = useState([`[SISTEM] Inti Pemantauan Vena v3.1 aktif.`]);
   const [isScanning, setIsScanning] = useState(false);

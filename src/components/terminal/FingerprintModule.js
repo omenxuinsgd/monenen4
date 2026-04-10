@@ -31,8 +31,8 @@ import {
 /**
  * FingerprintModule
  * Modul pendaftaran dan verifikasi sidik jari lengkap.
- * Menggunakan tombol kontrol mode sebagai pengganti select box.
- * FIX: Responsif untuk layar 11.6" 1920x1080 dengan zoom 90%
+ * FIX: Perbaikan tampilan visual buffer agar gambar tidak terpotong.
+ * FIX: Pemetaan indeks jari dinamis sesuai mode (Left/Right/Thumbs).
  */
 const FingerprintModule = ({ data, activeTab }) => {
   // State Data User
@@ -55,7 +55,7 @@ const FingerprintModule = ({ data, activeTab }) => {
   const [enrollmentComplete, setEnrollmentComplete] = useState(false);
   const [dbFingerImages, setDbFingerImages] = useState([]);
   const [isLoadingDbImages, setIsLoadingDbImages] = useState(false);
-   const [logs, setLogs] = useState([`[SYSTEM] Fingerprint Intelligence v1.7 Online.`]);
+  const [logs, setLogs] = useState([`[SYSTEM] Fingerprint Intelligence v1.7 Online.`]);
   
   // State untuk verification
   const [isVerifying, setIsVerifying] = useState(false);
@@ -64,8 +64,8 @@ const FingerprintModule = ({ data, activeTab }) => {
   const [mode, setMode] = useState("3"); 
 
   // Konfigurasi API
-  const API_FINGER_URL = "http://localhost:5000";
-  const API_REG_URL = "http://localhost:5000";
+  const API_FINGER_URL = "http://localhost:5160";
+  const API_REG_URL = "http://localhost:5160";
   
   const processedFingersRef = useRef(new Set());
   const enrollmentStartedRef = useRef(false);
@@ -92,11 +92,10 @@ const FingerprintModule = ({ data, activeTab }) => {
 
   const getExpectedFingerIndices = (m) => {
     const val = parseInt(m);
-    if (val === 0) return [5, 6, 7, 8];
-    if (val === 1) return [0, 1, 2, 3];
-    if (val === 2) return [0, 4];
-    if (val === 3) return [0];
-    if (val === 4) return [0];
+    if (val === 0) return [5, 6, 7, 8]; // Jari Kiri
+    if (val === 1) return [0, 1, 2, 3]; // Jari Kanan
+    if (val === 2) return [0, 5];       // Thumbs (Kanan & Kiri)
+    if (val === 3 || val === 4) return [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]; 
     if (val === 5) return [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
     return [0];
   };
@@ -121,23 +120,24 @@ const FingerprintModule = ({ data, activeTab }) => {
     try {
       const response = await fetch(`${API_FINGER_URL}/api/fingerprint/fingerimage/${userId}`);
       if (!response.ok) {
-        console.log("No fingerprint data found for user:", userId);
         setDbFingerImages([]);
         return;
       }
       const data = await response.json();
       const mappedImages = new Array(10).fill(null);
-      data.forEach((item, index) => {
-        let fingerIdx = item.fingerIndex || item.FingerIndex || index;
-        if (fingerIdx >= 0 && fingerIdx < 10) {
-          mappedImages[fingerIdx] = `data:image/jpeg;base64,${item.Image}`;
+      data.forEach((item) => {
+        let fingerIdx = item.fingerIndex || item.FingerIndex;
+        if (typeof fingerIdx === 'string' && fingerIdx.includes('-')) fingerIdx = fingerIdx.split('-').pop();
+        let idx = parseInt(fingerIdx) - 1;
+        if (idx >= 0 && idx < 10) {
+          mappedImages[idx] = `data:image/jpeg;base64,${item.Image}`;
         }
       });
       setDbFingerImages(mappedImages);
       setFingerCaptures(prev => {
-        const newCaptures = [...prev];
-        mappedImages.forEach((img, idx) => { if (img) newCaptures[idx] = img; });
-        return newCaptures;
+        const next = [...prev];
+        mappedImages.forEach((img, idx) => { if (img) next[idx] = img; });
+        return next;
       });
     } catch (error) {
       console.error("Error DB Load:", error);
@@ -164,7 +164,7 @@ const FingerprintModule = ({ data, activeTab }) => {
 
   useEffect(() => {
     if (isDataSaved && nik) loadFingerprintImagesFromDb(nik);
-  }, [isDataSaved, nik]);
+  }, [isDataSaved]);
 
   useEffect(() => {
     let intervalId;
@@ -188,9 +188,11 @@ const FingerprintModule = ({ data, activeTab }) => {
     };
   }, [isCapturing]);
 
+  // Polling Capture Logic (Enrollment)
   useEffect(() => {
     let pollId;
     if (!isEnrolling) return;
+    
     const syncFingers = async () => {
       try {
         const res = await fetch(`${API_FINGER_URL}/api/fingerprint/finger-captured`);
@@ -200,48 +202,58 @@ const FingerprintModule = ({ data, activeTab }) => {
             setFingerCaptures(prev => {
               const next = [...prev];
               let hasNew = false;
-              const expectedIndices = getExpectedFingerIndices(mode);
               const requiredCount = getRequiredCount(mode);
+              
               data.forEach(f => {
                 let rawIdx = f.fingerIndex || f.Index || 1;
                 if (typeof rawIdx === 'string' && rawIdx.includes('-')) rawIdx = rawIdx.split('-').pop();
-                const idx = parseInt(rawIdx) - 1;
+                let idx = parseInt(rawIdx) - 1;
+
+                if (mode === "0") { if (idx >= 0 && idx <= 3) idx += 5; } 
+                else if (mode === "2") { if (idx === 1) idx = 5; }
+
                 const b64 = f.image || f.Image || f.Base64;
-                if (expectedIndices.includes(idx) && b64 && !processedFingersRef.current.has(idx)) {
+                if (idx >= 0 && idx < 10 && b64 && !processedFingersRef.current.has(idx)) {
                   next[idx] = b64.startsWith('data:image') ? b64 : `data:image/bmp;base64,${b64}`;
                   processedFingersRef.current.add(idx);
                   hasNew = true;
                   showToast(`Captured: ${getFingerName(idx)}`, "success");
-                  if (processedFingersRef.current.size >= requiredCount && !enrollmentComplete) {
-                    setEnrollmentComplete(true);
-                    showToast(`Selesai! ${requiredCount} Jari Terdaftar`, "success");
-                    setTimeout(async () => {
-                      await handleAction('/api/fingerprint/stopcapture');
-                      setIsEnrolling(false);
-                      setIsCapturing(false);
-                      enrollmentStartedRef.current = false;
-                    }, 1500);
-                  }
                 }
               });
+
+              if (processedFingersRef.current.size >= requiredCount && !enrollmentComplete) {
+                setEnrollmentComplete(true);
+                showToast(`Selesai! ${requiredCount} Jari Terdeteksi`, "success");
+                stopEnrollmentProcess();
+              }
               return hasNew ? next : prev;
             });
           }
         }
       } catch (err) {}
     };
+
+    const stopEnrollmentProcess = async () => {
+        setTimeout(async () => {
+            await handleAction('/api/fingerprint/stopcapture');
+            setIsEnrolling(false);
+            setIsCapturing(false);
+            enrollmentStartedRef.current = false;
+            if (nik) loadFingerprintImagesFromDb(nik);
+        }, 1500);
+    };
+
     pollId = setInterval(syncFingers, 800);
     return () => clearInterval(pollId);
-  }, [isEnrolling, mode, enrollmentComplete]);
+  }, [isEnrolling, mode, enrollmentComplete, nik]);
 
-  // --- SINKRONISASI LOG KE SIDEBAR ---
-    useEffect(() => {
-      window.dispatchEvent(new CustomEvent('scanner:logs-sync', { detail: logs }));
-    }, [logs]);
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent('scanner:logs-sync', { detail: logs }));
+  }, [logs]);
 
   const handleAction = async (endpoint, body = null) => {
     setIsLoading(true);
-    addLog("mencoba mengghubungkan...", "info");
+    addLog(`Request ${endpoint}...`, "info");
     try {
       const response = await fetch(`${API_FINGER_URL}${endpoint}`, {
         method: 'POST',
@@ -249,13 +261,14 @@ const FingerprintModule = ({ data, activeTab }) => {
         body: body ? JSON.stringify(body) : null,
       });
       const result = await response.json().catch(() => ({ success: response.ok }));
-      return { ...result, message: result.message ? result.message.replace(/\0/g, '').trim() : "" };
+      const cleanMsg = result.message ? result.message.replace(/\0/g, '').trim() : "";
+      if (!result.success && cleanMsg) { addLog(cleanMsg, "error"); } 
+      else if (result.success) { addLog(`${endpoint} Success`, "success"); }
+      return { ...result, message: cleanMsg };
     } catch (error) {
-      addLog("koneksi terputus/gagal menghubungkan, coba lagi!", "error");
+      addLog("Koneksi gagal menghubungkan.", "error");
       return { success: false, message: "Koneksi terputus." };
-    } finally { 
-      setIsLoading(false); 
-    }
+    } finally { setIsLoading(false); }
   };
 
   const handleSaveUserData = async (e) => {
@@ -279,9 +292,7 @@ const FingerprintModule = ({ data, activeTab }) => {
       }
     } catch (error) {
       showToast("Server Registrasi Offline.", "error");
-    } finally {
-      setIsLoading(false);
-    }
+    } finally { setIsLoading(false); }
   };
 
   const handleEnroll = async () => {
@@ -316,7 +327,8 @@ const FingerprintModule = ({ data, activeTab }) => {
     setMatchResult(null);
     setVerifyResponse(null);
     capturedFingersRef.current = {};
-    setFingerCaptures(prev => prev.map((img, i) => dbFingerImages[i] ? img : null));
+    // Reset visual tapi tetap biarkan data DB untuk verifikasi
+    setFingerCaptures(prev => prev.map((img, i) => dbFingerImages[i] ? dbFingerImages[i] : null));
     try {
       const res = await fetch(`${API_FINGER_URL}/api/fingerprint/verify`, {
         method: "POST",
@@ -328,7 +340,13 @@ const FingerprintModule = ({ data, activeTab }) => {
         setFingerCaptures(prev => {
           const next = [...prev];
           json.fingers.forEach(f => {
-            let idx = (f.fingerIndex || 0) - 1;
+            let rawIdx = f.fingerIndex || f.Index || 1;
+            if (typeof rawIdx === 'string' && rawIdx.includes('-')) rawIdx = rawIdx.split('-').pop();
+            let idx = parseInt(rawIdx) - 1;
+
+            if (mode === "0") { if (idx >= 0 && idx <= 3) idx += 5; } 
+            else if (mode === "2") { if (idx === 1) idx = 5; }
+
             if (idx >= 0 && idx < 10 && f.image) {
               next[idx] = `data:image/bmp;base64,${f.image}`;
               capturedFingersRef.current[idx] = true;
@@ -346,9 +364,7 @@ const FingerprintModule = ({ data, activeTab }) => {
       }
     } catch (error) {
       showToast("Gagal Terhubung ke Server Verifikasi", "error");
-    } finally {
-      setIsVerifying(false);
-    }
+    } finally { setIsVerifying(false); }
   };
 
   const handleResetForm = () => {
@@ -359,6 +375,67 @@ const FingerprintModule = ({ data, activeTab }) => {
     processedFingersRef.current.clear(); enrollmentStartedRef.current = false;
     showToast("Form Direset", "success");
   };
+
+  const getActiveFingers = () => {
+    const expected = getExpectedFingerIndices(mode);
+    return fingerCaptures
+      .map((img, idx) => ({ img, idx }))
+      .filter(item => {
+        if (!item.img) return false;
+        if (isEnrolling || isVerifying) return true;
+        return expected.includes(item.idx);
+      });
+  };
+
+  const activeFingers = getActiveFingers();
+
+  // --- KOMPONEN VISUAL BUFFER ---
+  // FIX: Menggunakan min-h-[250px] dan items-start untuk mencegah gambar terpotong
+  const VisualBufferPanel = () => (
+    <div className="w-full border-2 border-[#00ffff]/20 bg-black/40 p-3 sm:p-5 rounded-sm shadow-2xl shrink-0 flex-1 min-h-[250px] flex flex-col font-mono">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3 border-b border-[#00ffff]/10 pb-2 sm:pb-3 mb-3 sm:mb-4">
+        <Fingerprint size={14} className="text-[#00ffff]" />
+        <span className="text-[11px] sm:text-[14px] font-black text-[#00ffff] uppercase tracking-[0.2em] sm:tracking-[0.4em]">Finger_Extraction_Visual_Buffer</span>
+        <div className="ml-auto flex items-center gap-2">
+          <div className={`h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full ${(isCapturing || isVerifying) ? 'bg-[#00ffff] animate-pulse shadow-[0_0_8px_#00ffff]' : 'bg-zinc-800'}`} />
+          <span className="text-[7px] sm:text-[8px] text-zinc-500 font-bold uppercase tracking-widest">{(isCapturing || isVerifying) ? 'Live_Feed' : 'Standby'}</span>
+        </div>
+      </div>
+      <div className="flex-1 flex items-start justify-center overflow-y-auto custom-scrollbar p-1">
+        {activeFingers.length === 0 ? (
+          <div className="flex flex-col items-center justify-center gap-4 opacity-40 h-full w-full">
+            {(isEnrolling || isCapturing || isVerifying) ? (
+              <>
+                <Loader2 size={32} className="text-[#00ffff] animate-spin" />
+                <span className="text-[10px] sm:text-[12px] font-black text-[#00ffff] uppercase tracking-[0.3em] animate-pulse text-center">Sedang menunggu split muncul..</span>
+              </>
+            ) : (
+              <>
+                <Fingerprint size={48} className="text-[#00ffff]/20" />
+                <span className="text-[9px] sm:text-[11px] font-black text-[#00ffff]/30 uppercase tracking-[0.2em] text-center">Buffer_Empty_Ready_To_Capture</span>
+              </>
+            )}
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-5 lg:grid-cols-6 gap-10 flex-1 overflow-y-auto custom-scrollbar p-1">
+            {activeFingers.map(({ img, idx }) => {
+              const isFromDb = dbFingerImages[idx] !== null;
+              return (
+                <motion.div initial={{ opacity: 0, scale: 0.8, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} key={idx} className="flex flex-col items-center gap-2 w-full max-w-[120px]">
+                  <div className={`relative w-full aspect-[3/4] border-2 border-[#00ffff]/40 shadow-[0_0_15px_#00ffff11] ${isFromDb ? 'bg-emerald-950/20' : 'bg-zinc-950'} rounded-sm overflow-hidden flex items-center justify-center transition-all group`}>
+                    <img src={img} className="w-full h-full object-contain p-1 filter brightness-110 contrast-125" alt="Finger" />
+                    {(isCapturing || isVerifying) && <div className="absolute inset-x-0 h-[2px] bg-[#00ffff]/60 shadow-[0_0_10px_#00ffff] animate-pixel-scan z-20" />}
+                    <div className="absolute top-0 left-0 bg-black/80 px-1.5 py-0.5 text-[7px] font-black text-emerald-400 border-r border-b border-[#00ffff]/10 uppercase tracking-tighter shadow-md z-30">{getFingerName(idx).substring(0, 3)}</div>
+                  </div>
+                  <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-[#00ffff]/80 text-center leading-tight">{getFingerName(idx)}</span>
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 
   // --- RENDER VERIFICATION TAB ---
   if (activeTab === 'verification') {
@@ -402,34 +479,38 @@ const FingerprintModule = ({ data, activeTab }) => {
           </div>
         </div>
 
-        <div className="flex-1 flex items-center justify-center min-h-0 py-3 sm:py-4">
-          <div className="relative aspect-square w-full max-w-[280px] sm:max-w-[350px] md:max-w-[400px] bg-zinc-950 border border-[#00ffff]/20 rounded-sm shadow-2xl overflow-hidden group mx-auto">
-            <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-6 text-center text-white text-[9px] sm:text-[10px]">
-              <AnimatePresence mode="wait">
-                {matchResult ? (
-                  <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="w-full h-full flex flex-col items-center justify-center">
-                    <div className="w-28 h-36 sm:w-36 sm:h-48 border border-[#00ffff]/20 bg-black/60 p-1.5 sm:p-2 rounded-sm shadow-2xl mb-3 sm:mb-4 relative">
-                      {capturedBuffer && <img src={capturedBuffer} className="w-full h-full object-contain mix-blend-screen brightness-125" alt="Match" />}
-                      <div className="absolute -top-2.5 -left-2.5 sm:-top-3 sm:-left-3 bg-black/80 px-1.5 sm:px-2 py-0.5 border border-[#00ffff]/20 text-[6px] sm:text-[7px] text-[#00ffff] font-black uppercase tracking-tighter shadow-lg">VERIFIED</div>
-                    </div>
-                    <div className="flex flex-col items-center gap-0.5 sm:gap-1">
-                      <h2 className="text-base sm:text-lg font-black text-white uppercase tracking-tight italic text-center">{matchResult.name}</h2>
-                      <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-4 text-[7px] sm:text-[9px] text-[#00ffff]/60 font-bold border-t border-[#00ffff]/10 pt-1.5 sm:pt-2 w-full justify-center mt-1">
-                        <span>ID: {matchResult.userId}</span>
-                        <span>STATUS: <span className="text-emerald-400">AUTHORIZED</span></span>
+        <div className="flex flex-col lg:flex-row flex-1 gap-4 overflow-hidden">
+          <div className="flex-1 flex items-center justify-center py-3 sm:py-4 bg-black/20 rounded-sm border border-white/5 min-h-[250px]">
+            <div className="relative aspect-square w-full max-w-[280px] sm:max-w-[320px] bg-zinc-950 border border-[#00ffff]/20 rounded-sm shadow-2xl overflow-hidden group mx-auto">
+              <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-6 text-center text-white text-[9px] sm:text-[10px]">
+                <AnimatePresence mode="wait">
+                  {matchResult ? (
+                    <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="w-full h-full flex flex-col items-center justify-center">
+                      <div className="w-24 h-32 sm:w-32 sm:h-40 border border-[#00ffff]/20 bg-black/60 p-1.5 sm:p-2 rounded-sm shadow-2xl mb-3 sm:mb-4 relative">
+                        {capturedBuffer && <img src={capturedBuffer} className="w-full h-full object-contain mix-blend-screen brightness-125" alt="Match" />}
+                        <div className="absolute -top-2.5 -left-2.5 sm:-top-3 sm:-left-3 bg-black/80 px-1.5 sm:px-2 py-0.5 border border-[#00ffff]/20 text-[6px] sm:text-[7px] text-[#00ffff] font-black uppercase tracking-tighter shadow-lg">VERIFIED</div>
                       </div>
+                      <div className="flex flex-col items-center gap-0.5 sm:gap-1">
+                        <h2 className="text-base sm:text-lg font-black text-white uppercase tracking-tight italic text-center">{matchResult.name}</h2>
+                        <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-4 text-[7px] sm:text-[9px] text-[#00ffff]/60 font-bold border-t border-[#00ffff]/10 pt-1.5 sm:pt-2 w-full justify-center mt-1">
+                          <span>ID: {matchResult.userId}</span>
+                          <span>STATUS: <span className="text-emerald-400">AUTHORIZED</span></span>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ) : (
+                    <div className="flex flex-col items-center gap-3 sm:gap-4 opacity-20">
+                      {isVerifying ? <Loader2 size={60} strokeWidth={1} className="text-[#00ffff] animate-spin" /> : <Search size={60} strokeWidth={1} className="text-[#00ffff] animate-pulse" />}
+                      <span className="text-[8px] sm:text-[10px] font-black uppercase tracking-[0.3em] sm:tracking-[0.5em] text-[#00ffff] text-center">{isVerifying ? 'Scanning...' : 'Awaiting_Verification'}</span>
                     </div>
-                  </motion.div>
-                ) : (
-                  <div className="flex flex-col items-center gap-3 sm:gap-4 opacity-20">
-                    {isVerifying ? <Loader2 size={60} strokeWidth={1} className="text-[#00ffff] animate-spin" /> : <Search size={60} strokeWidth={1} className="text-[#00ffff] animate-pulse" />}
-                    <span className="text-[8px] sm:text-[10px] font-black uppercase tracking-[0.3em] sm:tracking-[0.5em] text-[#00ffff] text-center">{isVerifying ? 'Scanning...' : 'Awaiting_Verification'}</span>
-                  </div>
-                )}
-              </AnimatePresence>
+                  )}
+                </AnimatePresence>
+              </div>
+              {(isCapturing || isVerifying) && <div className="absolute inset-x-0 h-[2px] bg-[#00ffff] shadow-[0_0_15px_#00ffff] animate-biometric-scan z-50" />}
             </div>
-            {isCapturing && <div className="absolute inset-x-0 h-[2px] bg-[#00ffff] shadow-[0_0_15px_#00ffff] animate-biometric-scan z-50" />}
           </div>
+          {/* Visual Buffer di Tab Verifikasi */}
+          {/* <VisualBufferPanel /> */}
         </div>
       </div>
     );
@@ -447,8 +528,7 @@ const FingerprintModule = ({ data, activeTab }) => {
         )}
       </AnimatePresence>
 
-      <div className="min-h-[320px] sm:h-[300px] py-2 sm:py-4 flex flex-col lg:flex-row gap-4 sm:gap-6 overflow-hidden shrink-0 font-mono">
-
+      <div className="min-h-[300px] py-2 sm:py-4 flex flex-col lg:flex-row gap-4 sm:gap-6 overflow-hidden shrink-0 font-mono">
         <div className="flex-1 border-2 border-[#00ffff]/20 bg-zinc-950/80 relative rounded-sm text-left shadow-lg flex flex-col">
           <div className="absolute -top-[10px] sm:-top-[12px] left-3 sm:left-5 bg-white text-black px-2 sm:px-3 py-0.5 text-[11px] sm:text-[14px] font-black uppercase tracking-widest z-[50] whitespace-nowrap">Registrasi_Data_User</div>
           <div className="absolute -top-[13px] sm:-top-[15px] right-3 sm:right-5 z-[60]">
@@ -456,9 +536,8 @@ const FingerprintModule = ({ data, activeTab }) => {
                 const endpoint = !isConnected ? '/api/fingerprint/opendevice' : '/api/fingerprint/closedevice';
                 const res = await handleAction(endpoint);
                 if (res.success) setIsConnected(!isConnected);
-              }} className={`px-2 sm:px-3 py-0.5 sm:py-1 border-2 text-[9px] sm:text-[11px] font-black uppercase transition-all flex items-center gap-1 sm:gap-2 shadow-lg ${isConnected ? 'bg-rose-500 border-rose-500 text-white' : 'bg-[#00ffff] border-[#00ffff] text-black hover:bg-white'}`}><Power size={10} /> <span className="hidden xs:inline">{isConnected ? 'Disconnect' : 'Connect Device'}</span><span className="xs:hidden">{isConnected ? 'Off' : 'On'}</span></button>
+              }} className={`px-2 sm:px-3 py-0.5 sm:py-1 border-2 text-[9px] sm:text-[11px] font-black uppercase transition-all flex items-center gap-1 sm:gap-2 shadow-lg ${isConnected ? 'bg-rose-500 border-rose-500 text-white' : 'bg-[#00ffff] border-[#00ffff] text-black hover:bg-white'}`}><Power size={10} /> <span className="hidden xs:inline">{isConnected ? 'Disconnect' : 'Connect Device'}</span></button>
           </div>
-          
           <div className="flex-1 p-4 sm:p-5 pt-6 sm:pt-8 flex flex-col justify-between">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div className="space-y-1">
@@ -474,9 +553,8 @@ const FingerprintModule = ({ data, activeTab }) => {
                 <input disabled={isDataSaved} value={address} onChange={(e) => setAddress(e.target.value)} placeholder="ADDRESS..." className="w-full bg-black/40 border-2 border-[#00ffff]/10 focus:border-[#00ffff] text-[11px] sm:text-[14px] p-2 text-zinc-400 outline-none rounded-sm uppercase font-mono shadow-inner" />
               </div>
             </div>
-            
             <div className="flex flex-wrap gap-2 sm:gap-3 mt-4 sm:mt-6">
-              <button onClick={handleSaveUserData} disabled={isDataSaved || isLoading} className={`flex-1 py-2 sm:py-3 border-2 font-black text-[11px] sm:text-[14px] uppercase tracking-widest transition-all rounded-sm flex items-center justify-center gap-1 sm:gap-2 ${!isDataSaved ? 'bg-[#00ffff]/10 border-[#00ffff] text-[#00ffff] hover:bg-[#00ffff] hover:text-black' : 'bg-zinc-900 border-zinc-800 text-zinc-600'}`}>{isLoading ? <Loader2 size={11} className="animate-spin"/> : isDataSaved ? <Lock size={11}/> : <Send size={11}/>} <span className="hidden xs:inline">{isDataSaved ? "DATA_TERKUNCI" : "Simpan Data User"}</span><span className="xs:hidden">{isDataSaved ? "LOCKED" : "SAVE"}</span></button>
+              <button onClick={handleSaveUserData} disabled={isDataSaved || isLoading} className={`flex-1 py-2 sm:py-3 border-2 font-black text-[11px] sm:text-[14px] uppercase tracking-widest transition-all rounded-sm flex items-center justify-center gap-1 sm:gap-2 ${!isDataSaved ? 'bg-[#00ffff]/10 border-[#00ffff] text-[#00ffff] hover:bg-[#00ffff] hover:text-black' : 'bg-zinc-900 border-zinc-800 text-zinc-600'}`}>{isLoading ? <Loader2 size={11} className="animate-spin"/> : isDataSaved ? <Lock size={11}/> : <Send size={11}/>} <span className="hidden xs:inline">{isDataSaved ? "DATA_TERKUNCI" : "Simpan Data User"}</span></button>
               {isDataSaved && (
                 <>
                   <button onClick={() => loadFingerprintImagesFromDb(nik)} disabled={isLoadingDbImages} className="px-3 sm:px-5 py-2 sm:py-3 border-2 border-[#00ffff]/30 text-[#00ffff] text-[9px] sm:text-[11px] font-black hover:bg-[#00ffff] hover:text-black uppercase transition-all rounded-sm"><RefreshCw size={11} className={isLoadingDbImages ? "animate-spin" : ""}/></button>
@@ -486,16 +564,13 @@ const FingerprintModule = ({ data, activeTab }) => {
             </div>
           </div>
         </div>
-
-        <div className="w-full lg:w-[700px] xl:w-[650px] h-full border-2 border-[#00ffff]/30 bg-zinc-900/60 relative rounded-sm flex flex-col justify-between shadow-xl min-h-[220px]">
+        <div className="w-full lg:w-[600px] border-2 border-[#00ffff]/30 bg-zinc-900/60 relative rounded-sm flex flex-col justify-between shadow-xl min-h-[220px]">
           <div className="absolute -top-[10px] sm:-top-[12px] left-3 sm:left-5 bg-white text-black px-2 sm:px-3 py-0.5 text-[11px] sm:text-[14px] font-black font-mono uppercase tracking-widest z-[50] whitespace-nowrap">Capture Control</div>
-          
           <div className="flex flex-col gap-3 sm:gap-4 p-3 sm:p-5 mt-2 sm:mt-3 flex-1">
             <div className="space-y-2 sm:space-y-3">
               <label className="text-[10px] sm:text-[12px] text-[#00ffff] font-black uppercase tracking-[0.2em] block flex items-center gap-2">
                 <Target size={10}/> Pilih Mode Capture
               </label>
-              
               <div className="grid grid-cols-3 sm:grid-cols-6 gap-1 sm:gap-2">
                 {CAPTURE_MODES.map((m) => (
                   <button key={m.id} disabled={isEnrolling} onClick={() => setMode(m.id)} className={`relative flex flex-col items-center justify-center p-0.5 border-2 rounded-sm transition-all group overflow-hidden ${mode === m.id ? 'bg-[#00ffff] border-[#00ffff] text-black shadow-[0_0_15px_#00ffff66]' : 'bg-black/60 border-white/10 text-[#00ffff]/40 hover:border-[#00ffff]/40 hover:text-[#00ffff]'}`}>
@@ -505,11 +580,9 @@ const FingerprintModule = ({ data, activeTab }) => {
                 ))}
               </div>
             </div>
-
             <label className="text-[10px] sm:text-[12px] text-[#00ffff] font-black uppercase tracking-[0.2em] block flex items-center gap-2">
                 <Target size={10}/> Jalankan Device & Enrollment
             </label>
-
             <div className="flex flex-col gap-2 mt-auto font-mono">
               <div className="flex flex-col sm:flex-row gap-2">
                 <button onClick={async () => {
@@ -529,45 +602,8 @@ const FingerprintModule = ({ data, activeTab }) => {
           </div>
         </div>
       </div>
-
-      <div className="w-full border-2 border-[#00ffff]/20 bg-black/40 p-3 sm:p-5 rounded-sm shadow-2xl shrink-0 flex-1 min-h-0 flex flex-col font-mono">
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3 border-b border-[#00ffff]/10 pb-2 sm:pb-3 mb-3 sm:mb-4">
-          <Fingerprint size={14} className="text-[#00ffff]" />
-          <span className="text-[11px] sm:text-[14px] font-black text-[#00ffff] uppercase tracking-[0.2em] sm:tracking-[0.4em]">Finger_Extraction_Visual_Buffer</span>
-          <div className="ml-auto flex items-center gap-2">
-            <div className={`h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full ${isCapturing ? 'bg-[#00ffff] animate-pulse shadow-[0_0_8px_#00ffff]' : 'bg-zinc-800'}`} />
-            <span className="text-[7px] sm:text-[8px] text-zinc-500 font-bold uppercase tracking-widest">{isCapturing ? 'Live_Feed' : 'Standby'}</span>
-          </div>
-        </div>
-        
-        <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-5 md:grid-cols-6 gap-3 sm:gap-5 md:gap-10 flex-1 overflow-y-auto custom-scrollbar p-1">
-          {fingerCaptures.map((img, idx) => {
-            const expectedIndices = getExpectedFingerIndices(mode);
-            const isExpected = expectedIndices.includes(idx);
-            const isFromDb = dbFingerImages[idx] !== null;
-            const displayImg = img || dbFingerImages[idx];
-            
-            return (
-              <div key={idx} className="flex flex-col items-center gap-1">
-                <div className={`relative w-full aspect-[3/4] border-2 ${isExpected ? 'border-[#00ffff]/40 shadow-[0_0_10px_#00ffff11]' : 'border-white/5'} ${isFromDb ? 'bg-emerald-950/20' : 'bg-zinc-950'} rounded-sm overflow-hidden flex items-center justify-center transition-all`}>
-                  <AnimatePresence>
-                    {displayImg ? (
-                      <motion.img initial={{ opacity: 0 }} animate={{ opacity: 1 }} src={displayImg} className="w-full h-full object-contain p-1 filter brightness-110 contrast-125" alt="Finger" />
-                    ) : (
-                      <Fingerprint size={24} className="opacity-[0.03]" />
-                    )}
-                  </AnimatePresence>
-                  {isCapturing && !displayImg && isExpected && <div className="absolute inset-x-0 h-[2px] bg-[#00ffff]/60 shadow-[0_0_10px_#00ffff] animate-pixel-scan z-20" />}
-                  <div className={`absolute top-0 left-0 bg-black/80 px-1 py-0.5 text-[6px] font-black ${displayImg ? 'text-emerald-400' : 'text-[#00ffff]/30'} border-r border-b border-[#00ffff]/10 uppercase tracking-tighter`}>{getFingerName(idx).substring(0, 3)}</div>
-                  {isFromDb && <div className="absolute bottom-0 right-0 bg-emerald-500/80 px-1 py-0.5 text-[5px] font-black text-white uppercase tracking-tighter">DB</div>}
-                </div>
-                <span className={`text-[6px] sm:text-[7px] md:text-[8px] font-black uppercase tracking-widest ${isExpected ? 'text-[#00ffff]/80' : 'text-zinc-600'}`}>{idx < 5 ? `L_${idx + 1}` : `R_${idx - 4}`}</span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-      
+      {/* Visual Buffer di Tab Enrollment */}
+      <VisualBufferPanel />
       <style jsx global>{`
         @keyframes biometric-scan { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
         .animate-biometric-scan { animation: biometric-scan 2.5s linear infinite; }
@@ -575,18 +611,7 @@ const FingerprintModule = ({ data, activeTab }) => {
         .animate-pixel-scan { animation: pixel-scan 2.2s linear infinite; }
         .custom-scrollbar::-webkit-scrollbar { width: 3px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0, 255, 255, 0.1); border-radius: 10px; }
-        
-        /* Extra small breakpoint untuk responsivitas */
-        @media (min-width: 480px) {
-          .xs\\:inline { display: inline !important; }
-          .xs\\:hidden { display: none !important; }
-          .xs\\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
-        }
-        @media (max-width: 479px) {
-          .xs\\:inline { display: none !important; }
-          .xs\\:hidden { display: inline !important; }
-          .xs\\:grid-cols-3 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
-        }
+        @media (min-width: 480px) { .xs\:inline { display: inline !important; } .xs\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; } }
       `}</style>
     </div>
   );

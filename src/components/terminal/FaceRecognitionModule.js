@@ -32,7 +32,7 @@ import {
  * FIX: Responsif untuk layar 11.6" 1920x1080 dengan zoom 90%
  */
 const FaceRecognitionModule = ({ data: propsData, activeTab }) => {
-  const baseUrl = "http://localhost:5000";
+  const baseUrl = "http://localhost:5160";
   
   // State dasar
   const [logs, setLogs] = useState([`[SYSTEM] Face Recognition Engine v3.2 Online.`]);
@@ -48,7 +48,7 @@ const FaceRecognitionModule = ({ data: propsData, activeTab }) => {
   const resultCanvasRef = useRef(null);
   
   // Data user dari localStorage
-  const [userData, setUserData] = useState({ userId: "12345" });
+  const [userData, setUserData] = useState({ userId: "123" });
 
   useEffect(() => {
     const stored = localStorage.getItem("registrationData");
@@ -57,7 +57,7 @@ const FaceRecognitionModule = ({ data: propsData, activeTab }) => {
       setUserData(parsed);
       loadBiometricData(parsed.userId);
     } else {
-      loadBiometricData("12345");
+      loadBiometricData("123");
     }
 
     return () => stopCamera();
@@ -91,17 +91,86 @@ const FaceRecognitionModule = ({ data: propsData, activeTab }) => {
     });
   };
 
-  const loadBiometricData = async (userId) => {
-    try {
-      const res = await fetch(`${baseUrl}/api/face/facebiometric/${userId}`);
-      if (res.ok) {
-        const data = await res.json();
-        setBiometricRecords(data);
-      }
-    } catch (err) {
-      console.error("Load failed:", err);
+  // const loadBiometricData = async (userId) => {
+  //   try {
+  //     const res = await fetch(`${baseUrl}/api/face/facebiometric/${userId}`);
+  //     if (res.ok) {
+  //       const data = await res.json();
+  //       setBiometricRecords(data);
+  //     }
+  //   } catch (err) {
+  //     console.error("Load failed:", err);
+  //   }
+  // };
+
+  // 1. Pastikan loadBiometricData membersihkan data lama sebelum memuat yang baru
+const loadBiometricData = async (userId) => {
+  try {
+    // Sesuai referensi: fetch(`${baseUrl}/api/face/facebiometric/${userId}`)
+    const res = await fetch(`${baseUrl}/api/face/facebiometric/${userId}`);
+    if (res.ok) {
+      const data = await res.json();
+      setBiometricRecords(data); // Simpan hasil ke state untuk render tabel
+      addLog(`Data biometrik untuk UID ${userId} berhasil dimuat.`, "info");
     }
-  };
+  } catch (err) {
+    console.error("Load failed:", err);
+    addLog("Gagal memuat data dari database.", "error");
+  }
+};
+
+// 2. Perbaikan handleEnrollAction agar sesuai dengan logika scripts.js
+const handleEnrollAction = async () => {
+  // Validasi dasar
+  if (!isConnected || isProcessing) return;
+  if (!userData?.userId) {
+    addLog("UserID tidak ditemukan dalam sesi pendaftaran.", "error");
+    return;
+  }
+
+  setIsProcessing(true);
+  addLog(`Memulai pendaftaran profil biometrik untuk UID: ${userData.userId}...`, "info");
+
+  try {
+    const ts = Date.now();
+    // Langkah 1: Ambil Snapshot dari backend (Sesuai referensi scripts.js)
+    const snapRes = await fetch(`${baseUrl}/api/face/snapshot?ts=${ts}`);
+    if (!snapRes.ok) throw new Error("Gagal mengambil snapshot dari sensor");
+    
+    const blob = await snapRes.blob();
+    const formData = new FormData();
+    
+    // Sesuai referensi: formData.append("frame", blob, `frame_${ts}.jpg`)
+    // dan formData.append("userId", data.userId)
+    formData.append("frame", blob, `enroll_${ts}.jpg`);
+    formData.append("userId", userData.userId);
+
+    // Langkah 2: Kirim ke endpoint Enroll
+    const res = await fetch(`${baseUrl}/api/face/enroll`, {
+      method: "POST",
+      body: formData
+    });
+
+    if (res.ok) {
+      const json = await res.json();
+      addLog("Pendaftaran BERHASIL. Database diperbarui.", "success");
+      
+      // Update tampilan log dengan hasil JSON dari backend (opsional)
+      console.log("Enroll Result:", json);
+
+      // Langkah 3: Muat ulang data ke tabel (Sesuai referensi loadFace(data.userId))
+      await loadBiometricData(userData.userId);
+    } else {
+      const errorText = await res.text();
+      addLog(`Pendaftaran DITOLAK: ${errorText}`, "error");
+    }
+  } catch (err) {
+    console.error(err);
+    addLog(`Kesalahan Sistem: ${err.message}`, "error");
+  } finally {
+    setIsProcessing(false);
+  }
+};
 
   const startCamera = () => {
     if (pollingRef.current) return;
@@ -269,36 +338,36 @@ const FaceRecognitionModule = ({ data: propsData, activeTab }) => {
     }
   };
 
-  const handleEnrollAction = async () => {
-    if (!isConnected || isProcessing) return;
-    setIsProcessing(true);
-    addLog(`Mendaftarkan profil biometrik: ${userData.userId}...`, "info");
+  // const handleEnrollAction = async () => {
+  //   if (!isConnected || isProcessing) return;
+  //   setIsProcessing(true);
+  //   addLog(`Mendaftarkan profil biometrik: ${userData.userId}...`, "info");
 
-    try {
-      const ts = Date.now();
-      const snapRes = await fetch(`${baseUrl}/api/face/snapshot?ts=${ts}`);
-      const blob = await snapRes.blob();
-      const formData = new FormData();
-      formData.append("frame", blob, `enroll_${ts}.jpg`);
-      formData.append("userId", userData.userId);
+  //   try {
+  //     const ts = Date.now();
+  //     const snapRes = await fetch(`${baseUrl}/api/face/snapshot?ts=${ts}`);
+  //     const blob = await snapRes.blob();
+  //     const formData = new FormData();
+  //     formData.append("frame", blob, `enroll_${ts}.jpg`);
+  //     formData.append("userId", userData.userId);
 
-      const res = await fetch(`${baseUrl}/api/face/enroll`, {
-        method: "POST",
-        body: formData
-      });
+  //     const res = await fetch(`${baseUrl}/api/face/enroll`, {
+  //       method: "POST",
+  //       body: formData
+  //     });
 
-      if (res.ok) {
-        addLog("Database identitas diperbarui.", "success");
-        loadBiometricData(userData.userId);
-      } else {
-        addLog("Pendaftaran ditolak.", "error");
-      }
-    } catch (err) {
-      addLog("Kesalahan jaringan.", "error");
-    } finally {
-      setIsProcessing(false);
-    }
-  };
+  //     if (res.ok) {
+  //       addLog("Database identitas diperbarui.", "success");
+  //       loadBiometricData(userData.userId);
+  //     } else {
+  //       addLog("Pendaftaran ditolak.", "error");
+  //     }
+  //   } catch (err) {
+  //     addLog("Kesalahan jaringan.", "error");
+  //   } finally {
+  //     setIsProcessing(false);
+  //   }
+  // };
 
   const handleDelete = async (uid) => {
     if (!confirm("Hapus rekaman biometrik ini?")) return;
@@ -337,6 +406,7 @@ const FaceRecognitionModule = ({ data: propsData, activeTab }) => {
             </div>
             
             <div className="flex flex-wrap gap-2">
+              <canvas ref={cameraCanvasRef} className="w-full h-full object-cover hidden" />
               <button onClick={isConnected ? stopCamera : startCamera} className={`px-3 sm:px-4 py-1 sm:py-1.5 border-2 text-[10px] sm:text-[12px] font-black uppercase rounded-sm transition-all flex items-center gap-1 sm:gap-2 ${isConnected ? 'border-red-500 text-red-500 hover:bg-red-500 hover:text-white' : 'border-[#00ffff] text-[#00ffff] hover:bg-[#00ffff] hover:text-black'}`}>
                 {isConnected ? <Power size={14} /> : <Video size={16} />}
                 <span className="hidden xs:inline">{isConnected ? 'Stop sensor' : 'Start sensor'}</span>
@@ -352,10 +422,10 @@ const FaceRecognitionModule = ({ data: propsData, activeTab }) => {
               {activeTab === 'face_enrollment' && (
                 <>
                   <button onClick={handleTrackingAction} disabled={!isConnected || isProcessing} className="px-3 sm:px-4 py-1 sm:py-1.5 border-2 text-[9px] sm:text-[11px] font-black uppercase border-[#00ffff]/30 text-[#00ffff] hover:bg-[#00ffff]/10 rounded-sm disabled:opacity-20 flex items-center gap-1 sm:gap-2">
-                    <Scan size={11} /> <span className="hidden xs:inline">Capture</span>
+                    <Scan size={11} /> Capture <span className="hidden xs:inline">Capture</span>
                   </button>
                   <button onClick={handleEnrollAction} disabled={!isConnected || isProcessing} className="px-3 sm:px-4 py-1 sm:py-1.5 border-2 text-[9px] sm:text-[11px] font-black uppercase border-[#00ffff]/30 text-[#00ffff] hover:bg-[#00ffff]/10 rounded-sm disabled:opacity-20 flex items-center gap-1 sm:gap-2">
-                    <Save size={11} /> <span className="hidden xs:inline">Save Enroll</span>
+                    <Save size={11} /> Save Enrollment <span className="hidden xs:inline">Save Enroll</span>
                   </button>
                 </>
               )}

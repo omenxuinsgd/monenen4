@@ -61,8 +61,8 @@ const FingerprintModule = ({ data, activeTab }) => {
   const [mode, setMode] = useState("3"); 
 
   // Konfigurasi API
-  const API_FINGER_URL = "http://localhost:5000";
-  const API_REG_URL = "http://localhost:5000";
+  const API_FINGER_URL = "http://localhost:7180";
+  const API_REG_URL = "http://localhost:7180";
   
   const processedFingersRef = useRef(new Set());
   const enrollmentStartedRef = useRef(false);
