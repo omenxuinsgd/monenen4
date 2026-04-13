@@ -24,6 +24,7 @@ import {
   Dna,
   ShieldAlert
 } from 'lucide-react';
+import toast, { Toaster } from 'react-hot-toast';
 
 /**
  * FaceRecognitionModule
@@ -48,7 +49,7 @@ const FaceRecognitionModule = ({ data: propsData, activeTab }) => {
   const resultCanvasRef = useRef(null);
   
   // Data user dari localStorage
-  const [userData, setUserData] = useState({ userId: "123" });
+  const [userData, setUserData] = useState({ userId: "1" });
 
   useEffect(() => {
     const stored = localStorage.getItem("registrationData");
@@ -72,6 +73,21 @@ const FaceRecognitionModule = ({ data: propsData, activeTab }) => {
     const prefix = type === "error" ? "[ERROR]" : type === "success" ? "[SUCCESS]" : "[INFO]";
     setLogs(prev => [`${prefix} ${msg} (${timestamp})`, ...prev].slice(0, 50));
   };
+
+  // Tambahkan di deretan state paling atas
+  const [isEnrollModalOpen, setIsEnrollModalOpen] = useState(false);
+  const [enrollForm, setEnrollForm] = useState({
+    userId: "",
+    name: "",
+    address: ""
+  });
+
+  // Update useEffect untuk sinkronisasi awal data form dari userData
+  useEffect(() => {
+    if (userData?.userId) {
+      setEnrollForm(prev => ({ ...prev, userId: userData.userId }));
+    }
+  }, [userData]);
 
   const drawImageToCanvas = (url, canvas) => {
     return new Promise((resolve) => {
@@ -120,53 +136,112 @@ const loadBiometricData = async (userId) => {
 };
 
 // 2. Perbaikan handleEnrollAction agar sesuai dengan logika scripts.js
-const handleEnrollAction = async () => {
-  // Validasi dasar
+// const handleEnrollAction = async () => {
+//   // Validasi dasar
+//   if (!isConnected || isProcessing) return;
+//   if (!userData?.userId) {
+//     addLog("UserID tidak ditemukan dalam sesi pendaftaran.", "error");
+//     return;
+//   }
+
+//   setIsProcessing(true);
+//   addLog(`Memulai pendaftaran profil biometrik untuk UID: ${userData.userId}...`, "info");
+
+//   try {
+//     const ts = Date.now();
+//     // Langkah 1: Ambil Snapshot dari backend (Sesuai referensi scripts.js)
+//     const snapRes = await fetch(`${baseUrl}/api/face/snapshot?ts=${ts}`);
+//     if (!snapRes.ok) throw new Error("Gagal mengambil snapshot dari sensor");
+    
+//     const blob = await snapRes.blob();
+//     const formData = new FormData();
+    
+//     // Sesuai referensi: formData.append("frame", blob, `frame_${ts}.jpg`)
+//     // dan formData.append("userId", data.userId)
+//     formData.append("frame", blob, `enroll_${ts}.jpg`);
+//     formData.append("userId", userData.userId);
+
+//     // Langkah 2: Kirim ke endpoint Enroll
+//     const res = await fetch(`${baseUrl}/api/face/enroll`, {
+//       method: "POST",
+//       body: formData
+//     });
+
+//     if (res.ok) {
+//       const json = await res.json();
+//       addLog("Pendaftaran BERHASIL. Database diperbarui.", "success");
+      
+//       // Update tampilan log dengan hasil JSON dari backend (opsional)
+//       console.log("Enroll Result:", json);
+
+//       // Langkah 3: Muat ulang data ke tabel (Sesuai referensi loadFace(data.userId))
+//       await loadBiometricData(userData.userId);
+//     } else {
+//       const errorText = await res.text();
+//       addLog(`Pendaftaran DITOLAK: ${errorText}`, "error");
+//     }
+//   } catch (err) {
+//     console.error(err);
+//     addLog(`Kesalahan Sistem: ${err.message}`, "error");
+//   } finally {
+//     setIsProcessing(false);
+//   }
+// };
+
+// tambahan
+const handleEnrollAction = async (e) => {
+  if (e) e.preventDefault();
+  
   if (!isConnected || isProcessing) return;
-  if (!userData?.userId) {
-    addLog("UserID tidak ditemukan dalam sesi pendaftaran.", "error");
+  if (!enrollForm.userId || !enrollForm.name) {
+    toast.error("ID dan Nama wajib diisi!");
+    addLog("ID dan Nama wajib diisi.", "error");
     return;
   }
 
+  // Menampilkan toast loading
+  const loadingToast = toast.loading("Sedang mendaftarkan subjek...");
   setIsProcessing(true);
-  addLog(`Memulai pendaftaran profil biometrik untuk UID: ${userData.userId}...`, "info");
 
   try {
     const ts = Date.now();
-    // Langkah 1: Ambil Snapshot dari backend (Sesuai referensi scripts.js)
     const snapRes = await fetch(`${baseUrl}/api/face/snapshot?ts=${ts}`);
-    if (!snapRes.ok) throw new Error("Gagal mengambil snapshot dari sensor");
+    if (!snapRes.ok) throw new Error("Gagal mengambil snapshot");
     
     const blob = await snapRes.blob();
     const formData = new FormData();
     
-    // Sesuai referensi: formData.append("frame", blob, `frame_${ts}.jpg`)
-    // dan formData.append("userId", data.userId)
     formData.append("frame", blob, `enroll_${ts}.jpg`);
-    formData.append("userId", userData.userId);
+    formData.append("userId", enrollForm.userId);
+    formData.append("name", enrollForm.name);
+    formData.append("address", enrollForm.address);
 
-    // Langkah 2: Kirim ke endpoint Enroll
     const res = await fetch(`${baseUrl}/api/face/enroll`, {
       method: "POST",
       body: formData
     });
 
     if (res.ok) {
-      const json = await res.json();
-      addLog("Pendaftaran BERHASIL. Database diperbarui.", "success");
+      // 1. Notifikasi Berhasil
+      toast.success(`Berhasil! Subjek ${enrollForm.name} telah terdaftar.`, { id: loadingToast });
+      addLog("Pendaftaran BERHASIL.", "success");
       
-      // Update tampilan log dengan hasil JSON dari backend (opsional)
-      console.log("Enroll Result:", json);
-
-      // Langkah 3: Muat ulang data ke tabel (Sesuai referensi loadFace(data.userId))
-      await loadBiometricData(userData.userId);
+      // 2. Tutup Modal Otomatis
+      setIsEnrollModalOpen(false); 
+      
+      // 3. Reset Form (Opsional agar bersih saat dibuka lagi)
+      setEnrollForm({ userId: userData.userId || "", name: "", address: "" });
+      
+      await loadBiometricData(enrollForm.userId);
     } else {
       const errorText = await res.text();
-      addLog(`Pendaftaran DITOLAK: ${errorText}`, "error");
+      // Notifikasi Gagal
+      toast.error(`Pendaftaran Gagal: ${errorText}. Silakan ulangi.`, { id: loadingToast });
+      addLog(`Ditolak: ${errorText}`, "error");
     }
   } catch (err) {
-    console.error(err);
-    addLog(`Kesalahan Sistem: ${err.message}`, "error");
+    toast.error(`Kesalahan Sistem: ${err.message}`, { id: loadingToast });
+    addLog(`Error: ${err.message}`, "error");
   } finally {
     setIsProcessing(false);
   }
@@ -384,7 +459,20 @@ const handleEnrollAction = async () => {
 
   return (
     <div className="w-full h-full p-3 sm:p-4 flex flex-col gap-4 sm:gap-5 overflow-hidden text-left bg-zinc-950/20 font-mono">
-      
+      {/* Letakkan Toaster di mana saja di dalam div utama */}
+      <Toaster 
+        position="top-right" 
+        toastOptions={{
+          style: {
+            background: '#09090b', // zinc-950
+            color: '#00ffff',      // cyan
+            border: '1px solid rgba(0, 255, 255, 0.2)',
+            fontFamily: 'monospace',
+            fontSize: '12px',
+          },
+        }} 
+      />
+
       {/* BARIS ATAS - Menggunakan flex dengan gap yang responsif */}
       <div className="h-[720px] sm:h-[740px] py-2 sm:py-4 flex flex-col lg:flex-row gap-4 sm:gap-6 overflow-hidden shrink-0">
         
@@ -415,17 +503,34 @@ const handleEnrollAction = async () => {
 
               {activeTab === 'face_verification' && (
                 <button onClick={handleMatchAction} disabled={!isConnected || isProcessing} className={`px-3 sm:px-4 py-1 sm:py-1.5 border-2 text-[9px] sm:text-[11px] font-black uppercase rounded-sm transition-all flex items-center gap-1 sm:gap-2 ${!isConnected || isProcessing ? 'opacity-20 border-zinc-500 text-zinc-500' : 'border-[#00ffff] text-[#00ffff] hover:bg-[#00ffff] hover:text-black shadow-[0_0_10px_rgba(0,255,255,0.2)]'}`}>
-                  <CheckCircle size={11} /> <span className="hidden xs:inline">Matching</span>
+                  <CheckCircle size={11} /> <span className="xs:inline"> Matching</span>
                 </button>
               )}
               
-              {activeTab === 'face_enrollment' && (
+              {/* {activeTab === 'face_enrollment' && (
                 <>
                   <button onClick={handleTrackingAction} disabled={!isConnected || isProcessing} className="px-3 sm:px-4 py-1 sm:py-1.5 border-2 text-[9px] sm:text-[11px] font-black uppercase border-[#00ffff]/30 text-[#00ffff] hover:bg-[#00ffff]/10 rounded-sm disabled:opacity-20 flex items-center gap-1 sm:gap-2">
                     <Scan size={11} /> Capture <span className="hidden xs:inline">Capture</span>
                   </button>
                   <button onClick={handleEnrollAction} disabled={!isConnected || isProcessing} className="px-3 sm:px-4 py-1 sm:py-1.5 border-2 text-[9px] sm:text-[11px] font-black uppercase border-[#00ffff]/30 text-[#00ffff] hover:bg-[#00ffff]/10 rounded-sm disabled:opacity-20 flex items-center gap-1 sm:gap-2">
                     <Save size={11} /> Save Enrollment <span className="hidden xs:inline">Save Enroll</span>
+                  </button>
+                </>
+              )} */}
+
+              {/* tambahan */}
+              {/* Cari bagian ini dan ganti */}
+              {activeTab === 'face_enrollment' && (
+                <>
+                  <button onClick={handleTrackingAction} disabled={!isConnected || isProcessing} className="px-3 sm:px-4 py-1 sm:py-1.5 border-2 text-[9px] sm:text-[11px] font-black uppercase border-[#00ffff]/30 text-[#00ffff] hover:bg-[#00ffff]/10 rounded-sm disabled:opacity-20 flex items-center gap-1 sm:gap-2">
+                    <Scan size={11} /> Capture <span className="hidden xs:inline">Capture</span>
+                  </button>
+                  <button 
+                    onClick={() => setIsEnrollModalOpen(true)} // Ubah ini untuk membuka modal
+                    disabled={!isConnected || isProcessing} 
+                    className="px-3 sm:px-4 py-1 sm:py-1.5 border-2 text-[9px] sm:text-[11px] font-black uppercase border-[#00ffff]/30 text-[#00ffff] hover:bg-[#00ffff]/10 rounded-sm disabled:opacity-20 flex items-center gap-1 sm:gap-2"
+                  >
+                    <User size={11} /> Enrollment Form
                   </button>
                 </>
               )}
@@ -566,6 +671,75 @@ const handleEnrollAction = async () => {
         </div>
       </div>
 
+      {/* tambahan */}
+      {/* MODAL ENROLLMENT FORM */}
+      {isEnrollModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md border-2 border-[#00ffff] bg-zinc-950 p-6 rounded-sm shadow-[0_0_50px_rgba(0,255,255,0.2)]">
+            <div className="flex justify-between items-center border-b border-[#00ffff]/30 pb-3 mb-6">
+              <h3 className="text-[#00ffff] font-black uppercase tracking-tighter flex items-center gap-2">
+                <Database size={18} /> New Subject Registration
+              </h3>
+              <button onClick={() => setIsEnrollModalOpen(false)} className="text-zinc-500 hover:text-white">
+                <Trash2 size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleEnrollAction} className="flex flex-col gap-4">
+              <div className="space-y-1">
+                <label className="text-[10px] text-[#00ffff] uppercase font-bold">Subject UID</label>
+                <input 
+                  type="text" 
+                  value={enrollForm.userId}
+                  onChange={(e) => setEnrollForm({...enrollForm, userId: e.target.value})}
+                  className="w-full bg-black border border-[#00ffff]/20 p-2 text-white font-mono focus:border-[#00ffff] outline-none"
+                  placeholder="e.g. 12345"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] text-[#00ffff] uppercase font-bold">Full Name</label>
+                <input 
+                  type="text" 
+                  value={enrollForm.name}
+                  onChange={(e) => setEnrollForm({...enrollForm, name: e.target.value})}
+                  className="w-full bg-black border border-[#00ffff]/20 p-2 text-white font-mono focus:border-[#00ffff] outline-none"
+                  placeholder="INPUT NAME..."
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] text-[#00ffff] uppercase font-bold">Address / Description</label>
+                <textarea 
+                  value={enrollForm.address}
+                  onChange={(e) => setEnrollForm({...enrollForm, address: e.target.value})}
+                  className="w-full bg-black border border-[#00ffff]/20 p-2 text-white font-mono focus:border-[#00ffff] outline-none h-20"
+                  placeholder="DEPT / OFFICE..."
+                />
+              </div>
+
+              <div className="mt-4 flex gap-3">
+                <button 
+                  type="button"
+                  onClick={() => setIsEnrollModalOpen(false)}
+                  className="flex-1 py-2 border-2 border-zinc-700 text-zinc-500 font-black uppercase hover:bg-zinc-800 transition-all"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit"
+                  disabled={isProcessing}
+                  className="flex-1 py-2 border-2 border-[#00ffff] bg-[#00ffff]/10 text-[#00ffff] font-black uppercase hover:bg-[#00ffff] hover:text-black transition-all flex items-center justify-center gap-2"
+                >
+                  {isProcessing ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
+                  Confirm Enroll
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       <style jsx>{`
         @keyframes pixel-scan { 0% { top: 0; } 100% { top: 100%; } }
         .animate-pixel-scan { position: absolute; height: 2px; width: 100%; animation: pixel-scan 2s linear infinite; }
@@ -609,6 +783,7 @@ const handleEnrollAction = async () => {
         }
       `}</style>
     </div>
+    
   );
 };
 

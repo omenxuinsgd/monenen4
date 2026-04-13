@@ -534,8 +534,22 @@ const PassportScannerModule = ({ data, activeTab: propActiveTab }) => {
                         </div>
                       ) : (
                         <>
-                          <div className="flex items-center gap-3 mb-4 border-b border-[#00ffff]/20 pb-3"><TerminalIcon size={18} className="text-[#00ffff] animate-pulse" /><span className="text-[15px] font-black text-[#00ffff] uppercase tracking-widest font-mono">Logs Output</span></div>
-                          <div className="flex-1 bg-black/60 border border-[#00ffff]/10 rounded-sm overflow-y-auto custom-scrollbar font-mono shadow-inner p-5"><pre className="text-emerald-400 text-[14px] leading-relaxed">{readerOutput || `[WAITING]: Awaiting NFC BAC authentication...`}{readerOutput && <span className="animate-pulse">_</span>}</pre></div>
+                          {/* <div className="flex items-center gap-3 mb-4 border-b border-[#00ffff]/20 pb-3"><TerminalIcon size={18} className="text-[#00ffff] animate-pulse" /><span className="text-[15px] font-black text-[#00ffff] uppercase tracking-widest font-mono">Logs Output</span></div>
+                          <div className="flex-1 bg-black/60 border border-[#00ffff]/10 rounded-sm overflow-y-auto custom-scrollbar font-mono shadow-inner p-5"><pre className="text-emerald-400 text-[14px] leading-relaxed">{readerOutput || `[WAITING]: Awaiting NFC BAC authentication...`}{readerOutput && <span className="animate-pulse">_</span>}</pre></div> */}
+                          <div className="flex items-center gap-3 mb-4 border-b border-[#00ffff]/20 pb-3">
+                            <TerminalIcon size={18} className="text-[#00ffff] animate-pulse" />
+                            <span className="text-[15px] font-black text-[#00ffff] uppercase tracking-widest font-mono">
+                              Logs Output
+                            </span>
+                          </div>
+
+                          {/* Penambahan h-full atau max-h agar container memiliki batas tinggi untuk memicu scroll */}
+                          <div className="flex-1 min-h-0 bg-black/60 border border-[#00ffff]/10 rounded-sm overflow-auto custom-scrollbar font-mono shadow-inner p-5">
+                            <pre className="text-emerald-400 text-[14px] leading-relaxed whitespace-pre-wrap break-words">
+                              {readerOutput || `[WAITING]: Awaiting NFC BAC authentication...`}
+                              {readerOutput && <span className="animate-pulse">_</span>}
+                            </pre>
+                          </div>
                         </>
                       )}
                   </div>

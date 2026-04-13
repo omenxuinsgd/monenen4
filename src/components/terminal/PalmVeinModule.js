@@ -45,7 +45,7 @@ const PalmVeinModule = ({ activeTab }) => {
   // Ref untuk mengelakkan stale closure dalam listener window
   const isScanningRef = useRef(false);
 
-  const [userData, setUserData] = useState({ userId: "12345" });
+  const [userData, setUserData] = useState({ userId: "1" });
 
   useEffect(() => {
     isScanningRef.current = isScanning;
@@ -58,7 +58,7 @@ const PalmVeinModule = ({ activeTab }) => {
       setUserData(parsed);
       loadBiometricData(parsed.userId);
     } else {
-      loadBiometricData("12345");
+      loadBiometricData("1");
     }
 
     // Pendengar acara (Event Listeners)

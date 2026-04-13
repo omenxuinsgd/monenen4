@@ -32,7 +32,7 @@ const OCRScannerModule = ({
 
   // Debugging: Pastikan environment siap
   useEffect(() => {
-    console.log("[DEBUG] OCR Module Ready. Endpoint: http://localhost:8000");
+    console.log("[DEBUG] OCR Module Ready. Endpoint: http://localhost:8001");
   }, []);
 
   const handleFileChange = (e) => {
@@ -77,7 +77,7 @@ const OCRScannerModule = ({
 
       console.log("[DEBUG] Initiating POST to /parse-document");
       
-      const parseResponse = await fetch('http://localhost:8000/parse-document', {
+      const parseResponse = await fetch('http://localhost:8001/parse-document', {
         method: 'POST',
         body: formData,
         mode: 'cors', // Menegaskan mode CORS
@@ -98,7 +98,7 @@ const OCRScannerModule = ({
       // Step 2: Get Result
       console.log(`[DEBUG] Initiating GET to /get-result/${requestId}`);
       
-      const resultResponse = await fetch(`http://localhost:8000/get-result/${requestId}`, {
+      const resultResponse = await fetch(`http://localhost:8001/get-result/${requestId}`, {
         method: 'GET',
         mode: 'cors'
       });

@@ -1,10 +1,10 @@
 ### Cek Status API
 
-GET http://localhost:8000/health
+GET http://localhost:8001/health
 
 ### Parse Document (Ganti 'yor_idcard.png' dengan path file Anda)
 
-POST http://localhost:8000/parse-document
+POST http://localhost:8001/parse-document
 Content-Type: multipart/form-data; boundary=WebAppBoundary
 
 --WebAppBoundary
