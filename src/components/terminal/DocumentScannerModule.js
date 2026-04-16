@@ -66,6 +66,7 @@ const DocumentScannerModule = ({ data }) => {
 
     try {
       console.log(`[WS] Menghubungkan ke ${type}...`);
+      addLog(`[WS] Menghubungkan ke ${type}...`);
       const ws = new WebSocket(url);
       
       ws.onopen = () => {
@@ -195,7 +196,7 @@ const DocumentScannerModule = ({ data }) => {
     <div className="flex-1 p-6 flex flex-col gap-6 overflow-y-auto custom-scrollbar">
       {/* BARIS ATAS: Status & Kontrol Utama */}
       <div className="flex flex-col lg:flex-row gap-8 items-start shrink-0">
-        <div className="w-full lg:w-[190px] flex flex-col items-center gap-2 shrink-0">
+        {/* <div className="w-full lg:w-[190px] flex flex-col items-center gap-2 shrink-0">
           <div className="relative w-full aspect-[1.25/1] border-2 border-[#00ffff]/30 bg-zinc-950 overflow-hidden shadow-2xl rounded-sm">
             <img 
               src="https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExb2N3ZXg5NzV5ZW9hZHJpY2xxMjRid2Q3dGt3aTBuNWwyMWI0cTFwbyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/gUNA7QH4AeLde/giphy.gif" 
@@ -216,27 +217,27 @@ const DocumentScannerModule = ({ data }) => {
             )}
           </div>
           <span className="text-[8px] text-[#00ffff]/40 font-bold uppercase tracking-[0.3em]">Scanner_Engine_v3.0</span>
-        </div>
+        </div> */}
 
-        <div className="flex-1 border-2 border-[#00ffff]/40 bg-zinc-900/60 p-5 relative rounded-sm flex flex-col shadow-2xl min-h-[160px]">
-          <div className="absolute -top-[12px] left-6 bg-white text-black px-4 py-0.5 text-[12px] font-black uppercase z-[50]">Setup Perangkat & Lisensi</div>
+        <div className="flex-1 border-2 border-[#00ffff]/40 bg-zinc-900/60 p-5 relative font-mono rounded-sm flex flex-col shadow-2xl min-h-[160px]">
+          <div className="absolute -top-[12px] left-6 bg-white text-black px-4 py-0.5 text-[14px] font-black uppercase z-[50]">Setup Perangkat & Lisensi</div>
           <div className="flex flex-row items-end gap-6 text-left font-mono w-full mb-auto">
             <div className="flex-none space-y-1">
-              <label className="text-[10px] text-[#00ffff]/60 uppercase font-black flex items-center gap-1"><LinkIcon size={10} /> Connectivity</label>
+              <label className="text-[14px] pt-2.5 text-[#00ffff]/60 uppercase font-black flex items-center gap-1"><LinkIcon size={10} /> Connectivity</label>
               <div className="flex gap-1 h-9 items-center">
-                <button onClick={() => connectSvc('cmd')} className={`px-4 h-full text-[10px] border font-black uppercase transition-all ${connStatus.cmd ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40' : 'bg-zinc-800 text-zinc-500 border-zinc-700'}`}>Cmd</button>
-                <button onClick={() => connectSvc('mc')} className={`px-4 h-full text-[10px] border font-black uppercase transition-all ${connStatus.mc ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40' : 'bg-zinc-800 text-zinc-500 border-zinc-700'}`}>Media</button>
+                <button onClick={() => connectSvc('cmd')} className={`px-4 h-full text-[14px] border font-black uppercase transition-all ${connStatus.cmd ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40' : 'bg-zinc-800 text-zinc-500 border-zinc-700'}`}>Cmd</button>
+                <button onClick={() => connectSvc('mc')} className={`px-4 h-full text-[14px] border font-black uppercase transition-all ${connStatus.mc ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40' : 'bg-zinc-800 text-zinc-500 border-zinc-700'}`}>Media</button>
               </div>
             </div>
             <div className="flex-1 space-y-1">
-              <label className="text-[10px] text-[#00ffff]/60 uppercase font-black flex items-center gap-1"><Key size={10} /> License Code</label>
+              <label className="text-[14px] text-[#00ffff]/60 uppercase font-black flex items-center gap-1"><Key size={10} /> License Code</label>
               <div className="flex gap-1 h-9 items-center">
-                <input type="text" value={formData.license} onChange={(e) => setFormData({...formData, license: e.target.value})} placeholder="Enter SDK License..." className="flex-1 bg-black border border-[#00ffff]/20 h-full px-3 text-[12px] text-white outline-none focus:border-[#00ffff]/60 font-mono placeholder:opacity-20" />
+                <input type="text" value={formData.license} onChange={(e) => setFormData({...formData, license: e.target.value})} placeholder="Enter SDK License..." className="flex-1 bg-black border border-[#00ffff]/20 h-full px-3 text-[14px] text-white outline-none focus:border-[#00ffff]/60 font-mono placeholder:opacity-20" />
                 <button onClick={handleInitSDK} disabled={!connStatus.cmd} className="px-4 h-full bg-white text-black text-[10px] font-black uppercase hover:bg-zinc-200 transition-all active:scale-95">INIT</button>
               </div>
             </div>
             <div className="flex-none w-44 space-y-1">
-              <label className="text-[10px] text-[#00ffff]/60 uppercase font-black flex items-center gap-1"><Maximize2 size={10} /> Scan Size</label>
+              <label className="text-[14px] text-[#00ffff]/60 uppercase font-black flex items-center gap-1"><Maximize2 size={10} /> Scan Size</label>
               <div className="h-9">
                 <select value={formData.scanWide} onChange={(e) => { const val = parseInt(e.target.value); setFormData({...formData, scanWide: val}); sendCmd({ id: 74, wide: val }); }} className="w-full h-full bg-black border border-[#00ffff]/20 px-2 text-[12px] text-white outline-none cursor-pointer focus:border-[#00ffff]/50">
                   <option value={1}>A4 Standard</option>
@@ -251,7 +252,7 @@ const DocumentScannerModule = ({ data }) => {
              <button 
                onClick={isCameraOpen ? closeCamera : openCamera} 
                disabled={!isLicenseActive} 
-               className={`flex-1 py-3 font-black text-[10px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 rounded-sm shadow-md ${
+               className={`flex-1 py-3 font-black text-[14px] font-mono uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 rounded-sm shadow-md ${
                  !isLicenseActive 
                    ? 'bg-zinc-800 text-zinc-600 border border-zinc-700 cursor-not-allowed opacity-50' 
                    : isCameraOpen 
@@ -276,17 +277,17 @@ const DocumentScannerModule = ({ data }) => {
       </div>
 
       {/* PANEL NAVIGASI BAWAH */}
-      <div className="flex-1 border-2 border-[#00ffff]/40 bg-zinc-950 flex flex-col rounded-sm relative overflow-hidden shadow-2xl min-h-[350px]">
+      <div className="flex-1 font-mono border-2 border-[#00ffff]/40 bg-zinc-950 flex flex-col rounded-sm relative overflow-hidden shadow-2xl min-h-[350px]">
           <div className="flex border-b border-[#00ffff]/10 bg-zinc-900/50">
             <button 
               onClick={() => setActiveBottomTab('storage')}
-              className={`px-6 py-3 text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 transition-all border-r border-[#00ffff]/10 ${activeBottomTab === 'storage' ? 'bg-[#00ffff] text-black' : 'text-[#00ffff]/40 hover:text-[#00ffff] hover:bg-zinc-800'}`}
+              className={`px-6 py-2 text-[12px] font-black uppercase tracking-[0.2em] flex items-center gap-2 transition-all border-r border-[#00ffff]/10 ${activeBottomTab === 'storage' ? 'bg-[#00ffff] text-black' : 'text-[#00ffff]/40 hover:text-[#00ffff] hover:bg-zinc-800'}`}
             >
               <Database size={14} /> Device Storage Path
             </button>
             <button 
               onClick={() => setActiveBottomTab('pdf')}
-              className={`px-6 py-3 text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 transition-all ${activeBottomTab === 'pdf' ? 'bg-[#00ffff] text-black' : 'text-[#00ffff]/40 hover:text-[#00ffff] hover:bg-zinc-800'}`}
+              className={`px-6 py-2 text-[12px] font-black uppercase tracking-[0.2em] flex items-center gap-2 transition-all ${activeBottomTab === 'pdf' ? 'bg-[#00ffff] text-black' : 'text-[#00ffff]/40 hover:text-[#00ffff] hover:bg-zinc-800'}`}
             >
               <Layers size={14} /> PDF Composition
             </button>
@@ -296,22 +297,22 @@ const DocumentScannerModule = ({ data }) => {
               {activeBottomTab === 'storage' ? (
                 <div className="space-y-6 font-mono text-left max-w-4xl animate-in fade-in duration-500">
                     <div className="space-y-1.5">
-                        <label className="text-[9px] text-zinc-500 uppercase font-black tracking-widest block">Destination File Path (SDK Local)</label>
-                        <input type="text" value={formData.grabImage} onChange={(e) => setFormData({...formData, grabImage: e.target.value})} className="w-full bg-black border border-[#00ffff]/20 p-2.5 text-[11px] text-[#00ffff] outline-none focus:border-[#00ffff]/50 font-mono shadow-inner" />
+                        <label className="text-[14px] text-zinc-500 uppercase font-black tracking-widest block">Destination File Path (SDK Local)</label>
+                        <input type="text" value={formData.grabImage} onChange={(e) => setFormData({...formData, grabImage: e.target.value})} className="w-full bg-black border border-[#00ffff]/20 p-2.5 text-[14px] text-[#00ffff] outline-none focus:border-[#00ffff]/50 font-mono shadow-inner" />
                     </div>
                     <div className="grid grid-cols-2 gap-8">
                         <div className="space-y-1.5">
-                            <label className="text-[9px] text-zinc-500 uppercase font-black tracking-widest block">DPI Resolution</label>
-                            <input type="number" value={formData.dpi} onChange={(e) => setFormData({...formData, dpi: parseInt(e.target.value)})} className="w-full bg-black border border-[#00ffff]/20 p-2.5 text-[11px] text-white outline-none focus:border-[#00ffff]/40" />
+                            <label className="text-[14px] text-zinc-500 uppercase font-black tracking-widest block">DPI Resolution</label>
+                            <input type="number" value={formData.dpi} onChange={(e) => setFormData({...formData, dpi: parseInt(e.target.value)})} className="w-full bg-black border border-[#00ffff]/20 p-2.5 text-[14px] text-white outline-none focus:border-[#00ffff]/40" />
                         </div>
                         <div className="space-y-1.5">
-                            <label className="text-[9px] text-zinc-500 uppercase font-black tracking-widest block">JPG Quality %</label>
-                            <input type="number" value={formData.jpgQuality} onChange={(e) => setFormData({...formData, jpgQuality: parseInt(e.target.value)})} className="w-full bg-black border border-[#00ffff]/20 p-2.5 text-[11px] text-white outline-none focus:border-[#00ffff]/40" />
+                            <label className="text-[14px] text-zinc-500 uppercase font-black tracking-widest block">JPG Quality %</label>
+                            <input type="number" value={formData.jpgQuality} onChange={(e) => setFormData({...formData, jpgQuality: parseInt(e.target.value)})} className="w-full bg-black border border-[#00ffff]/20 p-2.5 text-[14px] text-white outline-none focus:border-[#00ffff]/40" />
                         </div>
                     </div>
                     <div className="space-y-1.5">
-                        <label className="text-[9px] text-zinc-500 uppercase font-black tracking-widest block mb-1">Color Mode</label>
-                        <select value={formData.colorMode} onChange={(e) => setFormData({...formData, colorMode: parseInt(e.target.value)})} className="w-full bg-black border border-[#00ffff]/20 p-2.5 text-[11px] text-white outline-none focus:border-[#00ffff]/40 cursor-pointer font-mono">
+                        <label className="text-[14px] text-zinc-500 uppercase font-black tracking-widest block mb-1">Color Mode</label>
+                        <select value={formData.colorMode} onChange={(e) => setFormData({...formData, colorMode: parseInt(e.target.value)})} className="w-full bg-black border border-[#00ffff]/20 p-2.5 text-[14px] text-white outline-none focus:border-[#00ffff]/40 cursor-pointer font-mono">
                           <option value={0}>Color</option>
                           <option value={1}>Color Optimization</option>
                           <option value={2}>Grey Scale</option>
@@ -319,29 +320,29 @@ const DocumentScannerModule = ({ data }) => {
                         </select>
                     </div>
                     <div className="pt-2">
-                        <button onClick={handleTakePhoto} disabled={!isCameraOpen || isProcessing} className={`w-full py-4 rounded-sm text-[12px] font-black uppercase tracking-[0.4em] transition-all flex items-center justify-center gap-3 shadow-lg ${isCameraOpen && !isProcessing ? 'bg-indigo-600 text-white hover:bg-indigo-500 active:scale-95 shadow-[0_0_25px_rgba(79,70,229,0.3)]' : 'bg-zinc-800 text-zinc-600 border border-zinc-700 cursor-not-allowed'}`}>
-                          <Camera size={16} /> {isProcessing ? "Processing..." : "Take & Save Photo"}
+                        <button onClick={handleTakePhoto} disabled={!isCameraOpen || isProcessing} className={`w-full py-4 rounded-sm text-[14px] font-black uppercase tracking-[0.4em] transition-all flex items-center justify-center gap-3 shadow-lg ${isCameraOpen && !isProcessing ? 'bg-indigo-600 text-white hover:bg-indigo-500 active:scale-95 shadow-[0_0_25px_rgba(79,70,229,0.3)]' : 'bg-zinc-800 text-zinc-600 border border-zinc-700 cursor-not-allowed'}`}>
+                          <Camera size={22} /> {isProcessing ? "Processing..." : "Take & Save Photo"}
                         </button>
                     </div>
                 </div>
               ) : (
                 <div className="space-y-6 font-mono text-left max-w-4xl animate-in slide-in-from-right-4 duration-500">
                     <div className="space-y-1.5">
-                        <label className="text-[9px] text-zinc-500 uppercase font-black tracking-widest block">Source Image Path (Local Disk)</label>
-                        <input type="text" value={formData.pdfImage} onChange={(e) => setFormData({...formData, pdfImage: e.target.value})} placeholder="d:\scan_result.jpg" className="w-full bg-black border border-[#00ffff]/20 p-2.5 text-[11px] text-[#00ffff] outline-none focus:border-[#00ffff]/50 shadow-inner" />
+                        <label className="text-[14px] text-zinc-500 uppercase font-black tracking-widest block">Source Image Path (Local Disk)</label>
+                        <input type="text" value={formData.pdfImage} onChange={(e) => setFormData({...formData, pdfImage: e.target.value})} placeholder="d:\scan_result.jpg" className="w-full bg-black border border-[#00ffff]/20 p-2.5 text-[14px] text-[#00ffff] outline-none focus:border-[#00ffff]/50 shadow-inner" />
                     </div>
                     <div className="space-y-1.5">
-                        <label className="text-[9px] text-zinc-500 uppercase font-black tracking-widest block">Output PDF Path</label>
-                        <input type="text" value={formData.pdfFile} onChange={(e) => setFormData({...formData, pdfFile: e.target.value})} placeholder="d:\output.pdf" className="w-full bg-black border border-[#00ffff]/20 p-2.5 text-[11px] text-white outline-none focus:border-[#00ffff]/40 shadow-inner" />
+                        <label className="text-[14px] text-zinc-500 uppercase font-black tracking-widest block">Output PDF Path</label>
+                        <input type="text" value={formData.pdfFile} onChange={(e) => setFormData({...formData, pdfFile: e.target.value})} placeholder="d:\output.pdf" className="w-full bg-black border border-[#00ffff]/20 p-2.5 text-[14px] text-white outline-none focus:border-[#00ffff]/40 shadow-inner" />
                     </div>
                     <div className="pt-4">
                         <div className="bg-indigo-900/10 border border-indigo-500/20 p-4 rounded mb-4">
-                           <p className="text-[10px] text-indigo-300 leading-relaxed italic flex items-start gap-2">
+                           <p className="text-[14px] text-indigo-300 leading-relaxed italic flex items-start gap-2">
                              <Settings size={14} className="shrink-0" />
                              Instruksi: Mengubah file citra fisik dari direktori lokal menjadi dokumen PDF melalui engine SDK.
                            </p>
                         </div>
-                        <button onClick={handleGeneratePDF} className="w-full py-4 bg-indigo-600 text-white rounded-sm text-[12px] font-black uppercase tracking-[0.4em] shadow-lg hover:bg-indigo-500 active:scale-95 transition-all">
+                        <button onClick={handleGeneratePDF} className="w-full py-4 bg-indigo-600 text-white rounded-sm text-[14px] font-black uppercase tracking-[0.4em] shadow-lg hover:bg-indigo-500 active:scale-95 transition-all">
                            <FileText size={16} className="inline mr-3" /> Generate PDF File
                         </button>
                     </div>

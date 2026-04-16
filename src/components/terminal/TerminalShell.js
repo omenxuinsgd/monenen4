@@ -42,7 +42,7 @@ const TerminalShell = ({
       >
         <div className="absolute inset-0 bg-[#00ffff]/40" style={{ clipPath: polyOuter }} />
         <div className={`absolute inset-0 transition-colors duration-300 ${isActive ? 'bg-[#00ffff]' : 'bg-zinc-950'}`} style={{ clipPath: polyInner }} />
-        <span className={`relative z-30 text-[10px] font-black uppercase tracking-[0.2em] ${isActive ? 'text-black' : 'text-[#00ffff]/40'}`}>
+        <span className={`relative z-30 text-[15px] font-black font-mono uppercase tracking-[0.1em] ${isActive ? 'text-black' : 'text-[#00ffff]/40'}`}>
           {label}
         </span>
       </button>
@@ -76,22 +76,22 @@ const TerminalShell = ({
         
         <div className="flex-1 flex flex-col gap-6 overflow-hidden min-w-0">
           {/* BANNER JUDUL (ARCADE CLASSIC FONT) */}
-          <div className="relative py-2 px-10 border-2 border-[#00ffff]/20 bg-gradient-to-r from-[#00ffff]/5 to-transparent rounded-sm overflow-hidden shrink-0">
-            <h2 className="text-7xl tracking-[0.05em] font-arcade leading-none uppercase banner-title truncate">
+          <div className="relative py-2 px-10 mt-0.5 border-2 border-t-6 border-[#00ffff]/20 bg-gradient-to-r from-[#00ffff]/5 to-transparent rounded-sm overflow-hidden shrink-0">
+            <h2 className="text-4xl tracking-[0.05em] font-arcade leading-none uppercase banner-title truncate">
               {`> ${shortTitle}`}
             </h2>
             <Terminal size={120} className="absolute right-[-20px] top-[-20px] text-[#00ffff] opacity-5 -rotate-12" />
           </div>
 
           <div className="flex-1 flex flex-col relative overflow-hidden">
-            <div className="flex items-end h-11 w-fit relative z-30 overflow-visible">
+            <div className="flex items-end h-11 w-fit relative z-30 overflow-visibl">
               {tabs.map((tab, idx) => (
                 <NavTab key={tab.id} id={tab.id} label={tab.label} index={idx} isActive={activeTab === tab.id} onClick={setActiveTab} />
               ))}
             </div>
             
             <div className="flex-1 flex flex-col border-x-2 border-b-2 border-[#00ffff]/40 bg-black/60 rounded-sm shadow-2xl relative overflow-hidden">
-              <div className="h-[2px] w-full bg-[#00ffff]/40 shrink-0" />
+              <div className="h-[2px] w-full bg-[#00ffff]/40 shrink-0 pb-1 mb-2" />
               {children}
             </div>
           </div>

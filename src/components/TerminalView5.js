@@ -14,7 +14,7 @@ import {
 // Import Komponen Modular
 // Pastikan path import sesuai dengan folder tempat Anda menyimpan file-file di bawah
 import TerminalShell from './terminal/TerminalShell';
-import FingerprintModule from './terminal/FingerprintModule';
+import FingerprintModule from './terminal/FingerprintModule3';
 import ThermalPrinterModule from './terminal/ThermalPrinterModule';
 import BarcodeScannerModule from './terminal/BarcodeScannerModule';
 import OCRScannerModule from './terminal/OCRScannerModule';

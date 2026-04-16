@@ -11,52 +11,7 @@ import {
   Monitor,
   Fingerprint,
   Cpu,
-  Keyboard,
-  Power,
-  Home,
-  FolderOpen
-} from 'lucide-react';
-
-/**
- * TerminalView Component
- * Desain Pixel Art dengan font Arcade Classic.
- * Fitur Utama:
- * 1. Tombol Connect/Disconnect fungsional dengan perubahan status dan GIF.
- * 2. Keyboard Digital aktif untuk input NIK, Name, dan Identifier Key.
- * 3. Navigasi tab paralel slanted (\ \).
- * 4. Layout proporsional dengan tinggi Capture dan GIF yang sejajar.
- */
-const TerminalView = ({ data, onClose, isDarkMode }) => {
-  const [activeTab, setActiveTab] = useState('enrollment');
-  const [logs, setLogs] = useState([]);
-  const [nik, setNik] = useState("");
-  const [userName, setUserName] = useState("");
-  const [identifierKey, setIdentifierKey] = useState("");
-  const [activeInput, setActiveInput] = useState('nik');
-  const [isConnected, setIsConnected] = useState(false);
-
-  const shortTitle = data?.short?.split(' ')[0] || "SYSTEM";
-  const fullTitle = data?.title || "TERMINALIZER";
-
-  useEffect(() => {
-    const messages = [
-      `[PIXEL_BOOT] Memulakan bios... OK`,
-      `[SYSTEM] Sambungan ke ${fullTitle}...`,
-      `[MODULE] ${data?.status || 'Sedia'} sedia.`,
-      `[LOG] Root disahkan. Menunggu input.`
-    ];
-    let i = 0;
-    const interval = setInterval(() => {
-      if (i < messages.length) {
-        setLogs(prev => [...prev, messages[i]]);
-        i++;
-      } else { clearInterval(interval); }
-    }, 800);
-    return () => clearInterval(interval);
-  }, [data, fullTitle]);
-
-  // Fungsi untuk menangani klik pada keyboard digital
-  const handleKeyClick = (char) => {
+  Keyboard,                               
     if (activeInput === 'nik') {
       setNik(prev => prev + char);
     } else if (activeInput === 'name') {
@@ -77,7 +32,7 @@ const TerminalView = ({ data, onClose, isDarkMode }) => {
       ? `[DEVICE] ${shortTitle} TERHUBUNG pada ${timestamp}` 
       : `[DEVICE] ${shortTitle} TERPUTUS pada ${timestamp}`;
     
-    setLogs(prev => [...prev, message]);
+    setLogs(prev => [...prev, message]);  
   };
 
   // Maskot Dino Pixel Art (Didefinisikan namun saat ini digantikan GIF)

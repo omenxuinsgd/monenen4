@@ -20,7 +20,7 @@ import {
 
 // Import Komponen Modular
 import TerminalShell from './terminal/TerminalShell';
-import FingerprintModule from './terminal/FingerprintModule';
+import FingerprintModule from './terminal/FingerprintModule3';
 import ThermalPrinterModule from './terminal/ThermalPrinterModule';
 import BarcodeScannerModule from './terminal/BarcodeScannerModule';
 import OCRScannerModule from './terminal/OCRScannerModule'; 

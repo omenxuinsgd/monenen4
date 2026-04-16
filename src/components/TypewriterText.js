@@ -58,7 +58,7 @@ const TypewriterText = ({ text, delay = 0, speed = 0.03, showCursor = true }) =>
         <motion.span 
           animate={{ opacity: [0, 1, 0] }} 
           transition={{ repeat: Infinity, duration: 0.8 }} 
-          className="inline-block w-[3px] h-[1em] bg-[#00ffff] ml-1 translate-y-1" 
+          className="inline-block w-[4px] h-[1em] bg-[#00ffff] ml-1 translate-y-1" 
         />
       )}
     </motion.div>

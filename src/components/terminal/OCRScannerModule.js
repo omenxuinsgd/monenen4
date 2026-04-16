@@ -144,11 +144,11 @@ const OCRScannerModule = ({
     if (!extractedData) {
       return (
         <div className="text-center w-full">
-          <span className="text-[8px] text-zinc-600 uppercase block mb-3 tracking-[0.3em] font-black italic">
+          <span className="text-[14px] text-zinc-600 uppercase block mb-3 tracking-[0.3em] font-black italic">
             [ {isProcessing ? "PROCESSING_STREAM" : "WAITING_FOR_DATA"} ]
           </span>
           <div className="px-4 py-4 border border-[#00ffff]/5 bg-[#00ffff]/5 inline-block min-w-[200px]">
-            <h4 className="text-[12px] font-mono text-[#00ffff]/40 uppercase tracking-widest italic text-center">
+            <h4 className="text-[14px] font-mono text-[#00ffff]/40 uppercase tracking-widest italic text-center">
               {isProcessing ? "Menghubungi Server..." : "--- Buffer Kosong ---"}
             </h4>
           </div>
@@ -206,7 +206,7 @@ const OCRScannerModule = ({
       <div className="flex flex-col lg:flex-row gap-8 items-start shrink-0">
         
         {/* Unit Visual Mini */}
-        <div className="w-full lg:w-[190px] flex flex-col items-center gap-2 shrink-0 text-right">
+        {/* <div className="w-full lg:w-[190px] flex flex-col items-center gap-2 shrink-0 text-right">
           <div className="relative w-full aspect-[1.25/1] border-2 border-[#00ffff]/20 bg-zinc-950 overflow-hidden shadow-2xl group">
             <div className="w-full h-full relative">
               <img 
@@ -237,24 +237,24 @@ const OCRScannerModule = ({
             )}
           </div>
           <span className="text-[8px] text-[#00ffff]/40 font-bold uppercase tracking-[0.3em]">Recognition_Buffer_v1</span>
-        </div>
+        </div> */}
 
         {/* Panel Kontrol Capture */}
         <div className="flex-1 border-2 border-[#00ffff]/40 bg-zinc-900/60 p-6 relative rounded-sm flex flex-col gap-4 shadow-2xl">
-          <div className="absolute -top-[12px] left-6 bg-white text-black px-4 py-0.5 text-[10px] font-black uppercase z-[50]">OCR Capture Control</div>
+          <div className="absolute -top-[12px] left-6 bg-white text-black px-4 py-0.5 text-[14px] font-black uppercase z-[50] font-mono">OCR Capture Control</div>
           
           <div className="w-full text-left space-y-2">
-            <label className="text-[9px] text-[#00ffff]/60 font-black block uppercase tracking-widest flex items-center gap-2">
-              <ImageIcon size={10} /> 1. Pilih Sumber Gambar:
+            <label className="text-[13px] text-[#00ffff]/60 font-black block uppercase tracking-widest flex items-center gap-2 pt-4">
+              <ImageIcon size={14} /> Pilih Sumber Gambar:
             </label>
             
-            <div className="flex gap-2 h-14 relative">
+            <div className="flex gap-2 h-10 relative">
                <button 
                  onClick={() => fileInputRef.current.click()} 
-                 className={`flex-1 border-2 border-dashed text-[10px] px-4 font-black transition-all flex flex-row items-center justify-center gap-3 group ${hasBuffer ? 'border-[#00ffff] bg-[#00ffff]/10 text-[#00ffff]' : 'border-[#00ffff]/40 bg-[#00ffff]/5 text-zinc-500 hover:border-[#00ffff]/80 hover:text-[#00ffff]'}`}
+                 className={`flex-1 border-2 border-dashed text-[12px] px-4 font-black transition-all flex flex-row items-center justify-center gap-3 group ${hasBuffer ? 'border-[#00ffff] bg-[#00ffff]/10 text-[#00ffff]' : 'border-[#00ffff]/40 bg-[#00ffff]/5 text-zinc-500 hover:border-[#00ffff]/80 hover:text-[#00ffff]'}`}
                >
-                  <Folder size={16} className={hasBuffer ? 'scale-110 text-[#00ffff]' : ''} />
-                  <span className="tracking-widest uppercase text-center">
+                  <Folder size={18} className={hasBuffer ? 'scale-110 text-[#00ffff]' : ''} />
+                  <span className="tracking-widest uppercase text-center font-mono">
                     {hasBuffer ? "Ganti Gambar Sumber" : "Klik Untuk Memilih File (JPG/PNG)"}
                   </span>
                </button>
@@ -283,7 +283,7 @@ const OCRScannerModule = ({
              <button 
                 disabled={!hasBuffer || isProcessing}
                 onClick={handleExtract} 
-                className={`w-full py-3.5 text-black text-[11px] font-black uppercase tracking-[0.3em] shadow-[0_0_20px_rgba(0,255,255,0.2)] transition-all flex items-center justify-center gap-3 ${hasBuffer && !isProcessing ? 'bg-[#00ffff] hover:brightness-125' : 'bg-zinc-800 text-zinc-600 cursor-not-allowed'}`}
+                className={`w-full py-2 text-black text-[13px] font-black uppercase tracking-[0.3em] shadow-[0_0_20px_rgba(0,255,255,0.2)] transition-all flex items-center justify-center font-mono gap-3 ${hasBuffer && !isProcessing ? 'bg-[#00ffff] hover:brightness-125' : 'bg-zinc-800 text-zinc-600 cursor-not-allowed'}`}
              >
                {isProcessing ? (
                  <>
@@ -302,7 +302,7 @@ const OCRScannerModule = ({
       </div>
 
       {/* Panel Hasil Recognition dengan Navigasi Menu */}
-      <div className="flex-1 flex flex-col min-h-[350px]">
+      <div className="flex-1 flex flex-col min-h-[350px] font-mono">
         <div className="flex-1 border-2 border-[#00ffff]/40 bg-zinc-900/60 p-5 rounded-sm relative overflow-hidden flex flex-col gap-4 shadow-[0_0_20px_rgba(0,255,255,0.05)] text-left">
            <div className="absolute top-0 left-0 w-12 h-[2px] bg-[#00ffff]" />
            <div className="absolute top-0 left-0 w-[2px] h-12 bg-[#00ffff]" />
@@ -310,7 +310,7 @@ const OCRScannerModule = ({
            <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-[#00ffff]/20 pb-3 gap-4">
               <div className="flex items-center gap-2">
                 <div className={`w-2 h-2 rounded-full ${isProcessing ? 'bg-yellow-500 animate-ping' : hasBuffer ? 'bg-[#00ffff]' : 'bg-zinc-700'}`} />
-                <span className="text-[10px] font-black text-[#00ffff] uppercase tracking-[0.2em]">Hasil Recognition</span>
+                <span className="text-[16px] pl-2 font-black text-[#00ffff] uppercase tracking-[0.2em]">Hasil Recognition</span>
               </div>
               
               {/* NAVIGATION MENU */}
@@ -323,7 +323,7 @@ const OCRScannerModule = ({
                   <button
                     key={item.id}
                     onClick={() => setSubTab(item.id)}
-                    className={`flex items-center gap-2 px-3 py-1.5 text-[9px] font-black uppercase tracking-tighter transition-all ${
+                    className={`flex items-center gap-2 px-3 py-1.5 text-[12px] font-black uppercase tracking-tighter transition-all ${
                       subTab === item.id 
                         ? 'bg-[#00ffff] text-black shadow-[0_0_10px_rgba(0,255,255,0.5)]' 
                         : 'text-[#00ffff]/40 hover:text-[#00ffff] hover:bg-[#00ffff]/5'

@@ -32,7 +32,6 @@ import {
  * FingerprintModule
  * Modul pendaftaran dan verifikasi sidik jari lengkap.
  * Menggunakan tombol kontrol mode sebagai pengganti select box.
- * FIX: Responsif untuk layar 11.6" 1920x1080 dengan zoom 90%
  */
 const FingerprintModule = ({ data, activeTab }) => {
   // State Data User
@@ -55,7 +54,6 @@ const FingerprintModule = ({ data, activeTab }) => {
   const [enrollmentComplete, setEnrollmentComplete] = useState(false);
   const [dbFingerImages, setDbFingerImages] = useState([]);
   const [isLoadingDbImages, setIsLoadingDbImages] = useState(false);
-   const [logs, setLogs] = useState([`[SYSTEM] Fingerprint Intelligence v1.7 Online.`]);
   
   // State untuk verification
   const [isVerifying, setIsVerifying] = useState(false);
@@ -121,7 +119,6 @@ const FingerprintModule = ({ data, activeTab }) => {
     try {
       const response = await fetch(`${API_FINGER_URL}/api/fingerprint/fingerimage/${userId}`);
       if (!response.ok) {
-        console.log("No fingerprint data found for user:", userId);
         setDbFingerImages([]);
         return;
       }
@@ -144,12 +141,6 @@ const FingerprintModule = ({ data, activeTab }) => {
     } finally {
       setIsLoadingDbImages(false);
     }
-  };
-
-  const addLog = (msg, type = "info") => {
-    const timestamp = new Date().toLocaleTimeString();
-    const prefix = type === "error" ? "[ERROR]" : type === "success" ? "[SUCCESS]" : "[INFO]";
-    setLogs(prev => [`${prefix} ${msg} (${timestamp})`, ...prev].slice(0, 50));
   };
 
   useEffect(() => {
@@ -234,14 +225,8 @@ const FingerprintModule = ({ data, activeTab }) => {
     return () => clearInterval(pollId);
   }, [isEnrolling, mode, enrollmentComplete]);
 
-  // --- SINKRONISASI LOG KE SIDEBAR ---
-    useEffect(() => {
-      window.dispatchEvent(new CustomEvent('scanner:logs-sync', { detail: logs }));
-    }, [logs]);
-
   const handleAction = async (endpoint, body = null) => {
     setIsLoading(true);
-    addLog("mencoba mengghubungkan...", "info");
     try {
       const response = await fetch(`${API_FINGER_URL}${endpoint}`, {
         method: 'POST',
@@ -251,7 +236,6 @@ const FingerprintModule = ({ data, activeTab }) => {
       const result = await response.json().catch(() => ({ success: response.ok }));
       return { ...result, message: result.message ? result.message.replace(/\0/g, '').trim() : "" };
     } catch (error) {
-      addLog("koneksi terputus/gagal menghubungkan, coba lagi!", "error");
       return { success: false, message: "Koneksi terputus." };
     } finally { 
       setIsLoading(false); 
@@ -363,67 +347,67 @@ const FingerprintModule = ({ data, activeTab }) => {
   // --- RENDER VERIFICATION TAB ---
   if (activeTab === 'verification') {
     return (
-      <div className="flex-1 px-3 sm:px-4 py-2 flex flex-col gap-4 sm:gap-6 overflow-hidden text-left font-mono bg-black/40 relative">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-[#00ffff]/20 pb-3 gap-3 sm:gap-0">
+      <div className="flex-1 px-4 py-2 flex flex-col gap-6 overflow-hidden text-left font-mono bg-black/40 relative">
+        <div className="flex items-center justify-between border-b border-[#00ffff]/20 pb-3">
           <div className="flex flex-col">
-            <h1 className="text-xl sm:text-2xl font-black text-white uppercase tracking-tighter italic">Verification <span className="text-[#00ffff]">Personal Finger</span></h1>
-            <span className="pl-1 text-[10px] sm:text-[12px] text-[#00ffff]/50 uppercase tracking-[0.3em] sm:tracking-[0.4em]">Biometric_Vault_Protocol_v.4.0</span>
+            <h1 className="text-2xl font-black text-white uppercase tracking-tighter italic">Verification <span className="text-[#00ffff]">Personal Finger</span></h1>
+            <span className="pl-1 text-[12px] text-[#00ffff]/50 uppercase tracking-[0.4em]">Biometric_Vault_Protocol_v.4.0</span>
           </div>
           <button onClick={async () => {
             const endpoint = !isConnected ? '/api/fingerprint/opendevice' : '/api/fingerprint/closedevice';
             const res = await handleAction(endpoint);
             if (res.success || res.message?.toLowerCase().includes("already")) setIsConnected(!isConnected);
-          }} className={`p-1.5 sm:p-2 border transition-all rounded-sm ${isConnected ? 'border-rose-500 text-rose-500 hover:bg-rose-500 hover:text-white' : 'border-[#00ffff]/30 text-[#00ffff] hover:bg-[#00ffff] hover:text-black'}`}><Power size={14} /></button>
+          }} className={`p-2 border transition-all rounded-sm ${isConnected ? 'border-rose-500 text-rose-500 hover:bg-rose-500 hover:text-white' : 'border-[#00ffff]/30 text-[#00ffff] hover:bg-[#00ffff] hover:text-black'}`}><Power size={14} /></button>
         </div>
         
-        <div className="flex flex-col gap-3 sm:gap-4 bg-zinc-950/40 p-2 sm:p-3 border border-white/5 rounded-sm shrink-0">
-          <label className="text-[12px] sm:text-[14px] text-[#00ffff]/60 font-black uppercase tracking-widest flex items-center gap-2">
-            <LayoutGrid size={11} /> Pilih Mode Verifikasi
+        <div className="flex flex-col gap-4 bg-zinc-950/40 p-2 border border-white/5 rounded-sm shrink-0">
+          <label className="text-[16px] text-[#00ffff]/60 font-black uppercase tracking-widest flex items-center gap-2">
+            <LayoutGrid size={12} /> Pilih Mode Verifikasi
           </label>
-          <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5 sm:gap-2">
+          <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
             {CAPTURE_MODES.map((m) => (
-              <button key={m.id} onClick={() => setMode(m.id)} className={`flex flex-col items-center justify-center py-1 px-0.5 sm:px-1 border-2 rounded-sm transition-all ${mode === m.id ? 'bg-[#00ffff]/20 border-[#00ffff] text-[#00ffff] shadow-[0_0_10px_#00ffff44]' : 'bg-black/40 border-white/10 text-zinc-500 hover:border-white/30'}`}>
-                <span className="text-[12px] sm:text-[16px] font-black">{m.label}</span>
-                <span className="text-[8px] sm:text-[10px] md:text-[12px] opacity-60 uppercase hidden sm:inline">{m.detail}</span>
+              <button key={m.id} onClick={() => setMode(m.id)} className={`flex flex-col items-center justify-center py-1 px-1 border-2 rounded-sm transition-all ${mode === m.id ? 'bg-[#00ffff]/20 border-[#00ffff] text-[#00ffff] shadow-[0_0_10px_#00ffff44]' : 'bg-black/40 border-white/10 text-zinc-500 hover:border-white/30'}`}>
+                <span className="text-[16px] font-black">{m.label}</span>
+                <span className="text-[12px] opacity-60 uppercase">{m.detail}</span>
               </button>
             ))}
           </div>
           
-          <div className="flex flex-col sm:flex-row items-center gap-2 mt-2 font-mono">
+          <div className="flex items-center gap-2 mt-2 font-mono">
             <button onClick={async () => {
               const res = await handleAction('/api/fingerprint/startcapture', { mode: parseInt(mode), nMissingFinger: 0 });
               if (res.success) setIsCapturing(true);
-            }} disabled={!isConnected || isCapturing} className={`w-full sm:flex-1 py-2 sm:py-3 border font-black text-[11px] sm:text-[14px] uppercase transition-all flex items-center justify-center gap-1 sm:gap-2 rounded-sm ${isConnected && !isCapturing ? 'bg-[#00ffff]/10 border-[#00ffff] text-[#00ffff] hover:bg-[#00ffff]' : 'bg-zinc-900 border-zinc-800 text-zinc-600'}`}><Play size={11} fill="currentColor" /> Preview</button>
+            }} disabled={!isConnected || isCapturing} className={`flex-1 py-3 border font-black text-[14px] uppercase transition-all flex items-center justify-center gap-2 rounded-sm ${isConnected && !isCapturing ? 'bg-[#00ffff]/10 border-[#00ffff] text-[#00ffff] hover:bg-[#00ffff]' : 'bg-zinc-900 border-zinc-800 text-zinc-600'}`}><Play size={12} fill="currentColor" /> Preview</button>
             <button onClick={async () => {
               const res = await handleAction('/api/fingerprint/stopcapture');
               if (res.success !== false) setIsCapturing(false);
-            }} disabled={!isCapturing} className={`w-full sm:flex-1 py-2 sm:py-3 border font-black text-[11px] sm:text-[14px] uppercase transition-all flex items-center justify-center gap-1 sm:gap-2 rounded-sm ${isCapturing ? 'bg-rose-500/10 border-rose-500 text-rose-500 hover:bg-rose-500 hover:text-white' : 'bg-zinc-900 border-zinc-800 text-zinc-600'}`}><CircleStop size={11} fill="currentColor" /> Stop</button>
-            <button onClick={handleVerifyLogic} disabled={!isConnected || isVerifying} className={`w-full sm:flex-[1.5] py-2 sm:py-3 border font-black text-[11px] sm:text-[14px] uppercase transition-all flex items-center justify-center gap-1 sm:gap-2 rounded-sm ${isConnected ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-lg' : 'bg-zinc-900 border-zinc-800 text-zinc-600'}`}>{isVerifying ? <Loader2 size={11} className="animate-spin" /> : <ShieldCheck size={11} />} Verify</button>
+            }} disabled={!isCapturing} className={`flex-1 py-3 border font-black text-[14px] uppercase transition-all flex items-center justify-center gap-2 rounded-sm ${isCapturing ? 'bg-rose-500/10 border-rose-500 text-rose-500 hover:bg-rose-500 hover:text-white' : 'bg-zinc-900 border-zinc-800 text-zinc-600'}`}><CircleStop size={12} fill="currentColor" /> Stop</button>
+            <button onClick={handleVerifyLogic} disabled={!isConnected || isVerifying} className={`flex-[1.5] py-3 border font-black text-[14px] uppercase transition-all flex items-center justify-center gap-2 rounded-sm ${isConnected ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-lg' : 'bg-zinc-900 border-zinc-800 text-zinc-600'}`}>{isVerifying ? <Loader2 size={12} className="animate-spin" /> : <ShieldCheck size={12} />} Verify</button>
           </div>
         </div>
 
-        <div className="flex-1 flex items-center justify-center min-h-0 py-3 sm:py-4">
-          <div className="relative aspect-square w-full max-w-[280px] sm:max-w-[350px] md:max-w-[400px] bg-zinc-950 border border-[#00ffff]/20 rounded-sm shadow-2xl overflow-hidden group mx-auto">
-            <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-6 text-center text-white text-[9px] sm:text-[10px]">
+        <div className="flex-1 flex items-center justify-center min-h-0 py-4">
+          <div className="relative aspect-square h-full max-h-[400px] bg-zinc-950 border border-[#00ffff]/20 rounded-sm shadow-2xl overflow-hidden group">
+            <div className="absolute inset-0 flex items-center justify-center p-6 text-center text-white text-[10px]">
               <AnimatePresence mode="wait">
                 {matchResult ? (
                   <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="w-full h-full flex flex-col items-center justify-center">
-                    <div className="w-28 h-36 sm:w-36 sm:h-48 border border-[#00ffff]/20 bg-black/60 p-1.5 sm:p-2 rounded-sm shadow-2xl mb-3 sm:mb-4 relative">
+                    <div className="w-36 h-48 border border-[#00ffff]/20 bg-black/60 p-2 rounded-sm shadow-2xl mb-4 relative">
                       {capturedBuffer && <img src={capturedBuffer} className="w-full h-full object-contain mix-blend-screen brightness-125" alt="Match" />}
-                      <div className="absolute -top-2.5 -left-2.5 sm:-top-3 sm:-left-3 bg-black/80 px-1.5 sm:px-2 py-0.5 border border-[#00ffff]/20 text-[6px] sm:text-[7px] text-[#00ffff] font-black uppercase tracking-tighter shadow-lg">VERIFIED</div>
+                      <div className="absolute -top-3 -left-3 bg-black/80 px-2 py-0.5 border border-[#00ffff]/20 text-[7px] text-[#00ffff] font-black uppercase tracking-tighter shadow-lg">VERIFIED</div>
                     </div>
-                    <div className="flex flex-col items-center gap-0.5 sm:gap-1">
-                      <h2 className="text-base sm:text-lg font-black text-white uppercase tracking-tight italic text-center">{matchResult.name}</h2>
-                      <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-4 text-[7px] sm:text-[9px] text-[#00ffff]/60 font-bold border-t border-[#00ffff]/10 pt-1.5 sm:pt-2 w-full justify-center mt-1">
+                    <div className="flex flex-col items-center gap-1">
+                      <h2 className="text-lg font-black text-white uppercase tracking-tight italic">{matchResult.name}</h2>
+                      <div className="flex items-center gap-4 text-[9px] text-[#00ffff]/60 font-bold border-t border-[#00ffff]/10 pt-2 w-full justify-center mt-1">
                         <span>ID: {matchResult.userId}</span>
                         <span>STATUS: <span className="text-emerald-400">AUTHORIZED</span></span>
                       </div>
                     </div>
                   </motion.div>
                 ) : (
-                  <div className="flex flex-col items-center gap-3 sm:gap-4 opacity-20">
-                    {isVerifying ? <Loader2 size={60} strokeWidth={1} className="text-[#00ffff] animate-spin" /> : <Search size={60} strokeWidth={1} className="text-[#00ffff] animate-pulse" />}
-                    <span className="text-[8px] sm:text-[10px] font-black uppercase tracking-[0.3em] sm:tracking-[0.5em] text-[#00ffff] text-center">{isVerifying ? 'Scanning...' : 'Awaiting_Verification'}</span>
+                  <div className="flex flex-col items-center gap-4 opacity-20">
+                    {isVerifying ? <Loader2 size={80} strokeWidth={1} className="text-[#00ffff] animate-spin" /> : <Search size={80} strokeWidth={1} className="text-[#00ffff] animate-pulse" />}
+                    <span className="text-[10px] font-black uppercase tracking-[0.5em] text-[#00ffff]">{isVerifying ? 'Scanning...' : 'Awaiting_Verification'}</span>
                   </div>
                 )}
               </AnimatePresence>
@@ -437,110 +421,111 @@ const FingerprintModule = ({ data, activeTab }) => {
 
   // --- RENDER ENROLLMENT TAB ---
   return (
-    <div className="flex-1 p-3 sm:p-4 flex flex-col gap-3 sm:gap-4 overflow-y-auto custom-scrollbar text-left font-mono relative">
+    <div className="flex-1 p-4 flex flex-col gap-4 overflow-y-auto custom-scrollbar text-left font-mono relative">
       <AnimatePresence>
         {toast.show && (
-          <motion.div initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 50 }} className={`fixed top-12 right-12 z-[9999] flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-2 sm:py-3 border-2 shadow-2xl backdrop-blur-md rounded-sm ${toast.type === 'success' ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400' : 'bg-rose-500/10 border-rose-500 text-rose-400'}`}>
-            <span className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest">{toast.message}</span>
-            <button onClick={() => setToast({ ...toast, show: false })}><X size={12} /></button>
+          <motion.div initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 50 }} className={`fixed top-12 right-12 z-[9999] flex items-center gap-3 px-6 py-3 border-2 shadow-2xl backdrop-blur-md rounded-sm ${toast.type === 'success' ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400' : 'bg-rose-500/10 border-rose-500 text-rose-400'}`}>
+            <span className="text-[10px] font-black uppercase tracking-widest">{toast.message}</span>
+            <button onClick={() => setToast({ ...toast, show: false })}><X size={14} /></button>
           </motion.div>
         )}
       </AnimatePresence>
 
-      <div className="min-h-[320px] sm:h-[300px] py-2 sm:py-4 flex flex-col lg:flex-row gap-4 sm:gap-6 overflow-hidden shrink-0 font-mono">
+      <div className="h-[300px] py-4 flex flex-col lg:flex-row gap-6 overflow-hidden shrink-0 font-mono">
 
-        <div className="flex-1 border-2 border-[#00ffff]/20 bg-zinc-950/80 relative rounded-sm text-left shadow-lg flex flex-col">
-          <div className="absolute -top-[10px] sm:-top-[12px] left-3 sm:left-5 bg-white text-black px-2 sm:px-3 py-0.5 text-[11px] sm:text-[14px] font-black uppercase tracking-widest z-[50] whitespace-nowrap">Registrasi_Data_User</div>
-          <div className="absolute -top-[13px] sm:-top-[15px] right-3 sm:right-5 z-[60]">
+        <div className="flex items-center justify-between flex flex-col lg:col-span-6 border-2 border-[#00ffff]/20 bg-zinc-950/80 relative rounded-sm text-left shadow-lg flex flex-col">
+          <div className="absolute -top-[12px] left-5 bg-white text-black px-3 py-0.5 text-[14px] font-black uppercase tracking-widest z-[50]">Registrasi_Data_User</div>
+          <div className="absolute -top-[15px] right-5 z-[60]">
              <button onClick={async () => {
                 const endpoint = !isConnected ? '/api/fingerprint/opendevice' : '/api/fingerprint/closedevice';
                 const res = await handleAction(endpoint);
                 if (res.success) setIsConnected(!isConnected);
-              }} className={`px-2 sm:px-3 py-0.5 sm:py-1 border-2 text-[9px] sm:text-[11px] font-black uppercase transition-all flex items-center gap-1 sm:gap-2 shadow-lg ${isConnected ? 'bg-rose-500 border-rose-500 text-white' : 'bg-[#00ffff] border-[#00ffff] text-black hover:bg-white'}`}><Power size={10} /> <span className="hidden xs:inline">{isConnected ? 'Disconnect' : 'Connect Device'}</span><span className="xs:hidden">{isConnected ? 'Off' : 'On'}</span></button>
+              }} className={`px-3 py-1 border-2 text-[11px] font-black uppercase transition-all flex items-center gap-2 shadow-lg ${isConnected ? 'bg-rose-500 border-rose-500 text-white' : 'bg-[#00ffff] border-[#00ffff] text-black hover:bg-white'}`}><Power size={12} /> {isConnected ? 'Disconnect' : 'Connect Device'}</button>
           </div>
           
-          <div className="flex-1 p-4 sm:p-5 pt-6 sm:pt-8 flex flex-col justify-between">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+          <div className="flex-1 p-5 pt-8 flex flex-col justify-between">
+            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-[11px] sm:text-[14px] text-[#00ffff]/60 font-black uppercase tracking-widest ml-1 flex items-center gap-1"><IdCard size={9}/> User ID / NIK</label>
-                <input disabled={isDataSaved} value={nik} onChange={(e) => setNik(e.target.value)} placeholder="NIK..." className="w-full bg-black/40 border-2 border-[#00ffff]/10 focus:border-[#00ffff] text-[11px] sm:text-[14px] p-2 text-[#00ffff] outline-none rounded-sm uppercase font-mono shadow-inner" />
+                <label className="text-[14px] text-[#00ffff]/60 font-black uppercase tracking-widest ml-1 flex items-center gap-1"><IdCard size={10}/> User ID / NIK</label>
+                <input disabled={isDataSaved} value={nik} onChange={(e) => setNik(e.target.value)} placeholder="NIK..." className="w-full bg-black/40 border-2 border-[#00ffff]/10 focus:border-[#00ffff] text-[14px] p-2.5 text-[#00ffff] outline-none rounded-sm uppercase font-mono shadow-inner" />
               </div>
               <div className="space-y-1">
-                <label className="text-[11px] sm:text-[14px] text-[#00ffff]/60 font-black uppercase tracking-widest ml-1 flex items-center gap-1"><User size={9}/> Full Name</label>
-                <input disabled={isDataSaved} value={userName} onChange={(e) => setUserName(e.target.value)} placeholder="NAME..." className="w-full bg-black/40 border-2 border-[#00ffff]/10 focus:border-[#00ffff] text-[11px] sm:text-[14px] p-2 text-white outline-none rounded-sm uppercase font-mono shadow-inner" />
+                <label className="text-[14px] text-[#00ffff]/60 font-black uppercase tracking-widest ml-1 flex items-center gap-1"><User size={10}/> Full Name</label>
+                <input disabled={isDataSaved} value={userName} onChange={(e) => setUserName(e.target.value)} placeholder="NAME..." className="w-full bg-black/40 border-2 border-[#00ffff]/10 focus:border-[#00ffff] text-[14px] p-2.5 text-white outline-none rounded-sm uppercase font-mono shadow-inner" />
               </div>
-              <div className="col-span-1 sm:col-span-2 space-y-1">
-                <label className="text-[11px] sm:text-[14px] text-[#00ffff]/60 font-black uppercase tracking-widest ml-1 flex items-center gap-1"><MapPin size={9}/> Address</label>
-                <input disabled={isDataSaved} value={address} onChange={(e) => setAddress(e.target.value)} placeholder="ADDRESS..." className="w-full bg-black/40 border-2 border-[#00ffff]/10 focus:border-[#00ffff] text-[11px] sm:text-[14px] p-2 text-zinc-400 outline-none rounded-sm uppercase font-mono shadow-inner" />
+              <div className="col-span-2 space-y-1">
+                <label className="text-[14px] text-[#00ffff]/60 font-black uppercase tracking-widest ml-1 flex items-center gap-1"><MapPin size={10}/> Address</label>
+                <input disabled={isDataSaved} value={address} onChange={(e) => setAddress(e.target.value)} placeholder="ADDRESS..." className="w-full bg-black/40 border-2 border-[#00ffff]/10 focus:border-[#00ffff] text-[14px] p-2.5 text-zinc-400 outline-none rounded-sm uppercase font-mono shadow-inner" />
               </div>
             </div>
             
-            <div className="flex flex-wrap gap-2 sm:gap-3 mt-4 sm:mt-6">
-              <button onClick={handleSaveUserData} disabled={isDataSaved || isLoading} className={`flex-1 py-2 sm:py-3 border-2 font-black text-[11px] sm:text-[14px] uppercase tracking-widest transition-all rounded-sm flex items-center justify-center gap-1 sm:gap-2 ${!isDataSaved ? 'bg-[#00ffff]/10 border-[#00ffff] text-[#00ffff] hover:bg-[#00ffff] hover:text-black' : 'bg-zinc-900 border-zinc-800 text-zinc-600'}`}>{isLoading ? <Loader2 size={11} className="animate-spin"/> : isDataSaved ? <Lock size={11}/> : <Send size={11}/>} <span className="hidden xs:inline">{isDataSaved ? "DATA_TERKUNCI" : "Simpan Data User"}</span><span className="xs:hidden">{isDataSaved ? "LOCKED" : "SAVE"}</span></button>
+            <div className="flex gap-3 mt-6">
+              <button onClick={handleSaveUserData} disabled={isDataSaved || isLoading} className={`flex-1 py-3 border-2 font-black text-[14px] uppercase tracking-widest transition-all rounded-sm flex items-center justify-center gap-2 ${!isDataSaved ? 'bg-[#00ffff]/10 border-[#00ffff] text-[#00ffff] hover:bg-[#00ffff] hover:text-black' : 'bg-zinc-900 border-zinc-800 text-zinc-600'}`}>{isLoading ? <Loader2 size={12} className="animate-spin"/> : isDataSaved ? <Lock size={12}/> : <Send size={12}/>} {isDataSaved ? "DATA_TERKUNCI" : "Simpan Data User"}</button>
               {isDataSaved && (
                 <>
-                  <button onClick={() => loadFingerprintImagesFromDb(nik)} disabled={isLoadingDbImages} className="px-3 sm:px-5 py-2 sm:py-3 border-2 border-[#00ffff]/30 text-[#00ffff] text-[9px] sm:text-[11px] font-black hover:bg-[#00ffff] hover:text-black uppercase transition-all rounded-sm"><RefreshCw size={11} className={isLoadingDbImages ? "animate-spin" : ""}/></button>
-                  <button onClick={() => { setIsDataSaved(false); setEnrollmentComplete(false); setFingerCaptures(new Array(10).fill(null)); processedFingersRef.current.clear(); }} className="px-3 sm:px-5 py-2 sm:py-3 border-2 border-[#ff00ff]/30 text-[#ff00ff] text-[9px] sm:text-[11px] font-black hover:bg-[#ff00ff] hover:text-white uppercase transition-all rounded-sm"><Unlock size={11} /></button>
+                  <button onClick={() => loadFingerprintImagesFromDb(nik)} disabled={isLoadingDbImages} className="px-5 py-3 border-2 border-[#00ffff]/30 text-[#00ffff] text-[10px] font-black hover:bg-[#00ffff] hover:text-black uppercase transition-all rounded-sm"><RefreshCw size={12} className={isLoadingDbImages ? "animate-spin" : ""}/></button>
+                  <button onClick={() => { setIsDataSaved(false); setEnrollmentComplete(false); setFingerCaptures(new Array(10).fill(null)); processedFingersRef.current.clear(); }} className="px-5 py-3 border-2 border-[#ff00ff]/30 text-[#ff00ff] text-[10px] font-black hover:bg-[#ff00ff] hover:text-white uppercase transition-all rounded-sm"><Unlock size={12} /></button>
                 </>
               )}
             </div>
           </div>
         </div>
 
-        <div className="w-full lg:w-[700px] xl:w-[650px] h-full border-2 border-[#00ffff]/30 bg-zinc-900/60 relative rounded-sm flex flex-col justify-between shadow-xl min-h-[220px]">
-          <div className="absolute -top-[10px] sm:-top-[12px] left-3 sm:left-5 bg-white text-black px-2 sm:px-3 py-0.5 text-[11px] sm:text-[14px] font-black font-mono uppercase tracking-widest z-[50] whitespace-nowrap">Capture Control</div>
+        <div className="w-full lg:w-[900px] h-full lg:col-span-5 border-2 border-[#00ffff]/30 bg-zinc-900/60 relative rounded-sm flex flex-col justify-between shadow-xl min-h-[220px]">
+          <div className="absolute -top-[12px] left-5 bg-white text-black px-3 py-0.5 text-[14px] font-black font-mono uppercase tracking-widest z-[50]">Capture Control</div>
           
-          <div className="flex flex-col gap-3 sm:gap-4 p-3 sm:p-5 mt-2 sm:mt-3 flex-1">
-            <div className="space-y-2 sm:space-y-3">
-              <label className="text-[10px] sm:text-[12px] text-[#00ffff] font-black uppercase tracking-[0.2em] block flex items-center gap-2">
-                <Target size={10}/> Pilih Mode Capture
+          <div className="flex flex-col gap-4 p-5 mt-3 flex-1">
+            <div className="space-y-3">
+              <label className="text-[12px] text-[#00ffff] font-black uppercase tracking-[0.2em] block flex items-center gap-2">
+                <Target size={12}/> Pilih Mode Capture
               </label>
               
-              <div className="grid grid-cols-3 sm:grid-cols-6 gap-1 sm:gap-2">
+              <div className="grid grid-cols-6 gap-2">
                 {CAPTURE_MODES.map((m) => (
                   <button key={m.id} disabled={isEnrolling} onClick={() => setMode(m.id)} className={`relative flex flex-col items-center justify-center p-0.5 border-2 rounded-sm transition-all group overflow-hidden ${mode === m.id ? 'bg-[#00ffff] border-[#00ffff] text-black shadow-[0_0_15px_#00ffff66]' : 'bg-black/60 border-white/10 text-[#00ffff]/40 hover:border-[#00ffff]/40 hover:text-[#00ffff]'}`}>
-                    <span className="text-[12px] sm:text-[16px] font-black z-10">{m.label}</span>
-                    <span className={`text-[8px] sm:text-[10px] md:text-[12px] uppercase z-10 font-bold hidden sm:inline ${mode === m.id ? 'text-black/60' : 'opacity-40'}`}>{m.detail}</span>
+                    <span className="text-[16px] font-black z-10">{m.label}</span>
+                    <span className={`text-[12px] uppercase z-10 font-bold ${mode === m.id ? 'text-black/60' : 'opacity-40'}`}>{m.detail}</span>
+                    {mode === m.id && <motion.div layoutId="activeMode" className="absolute inset-0 bg-[#00ffff] z-0" />}
                   </button>
                 ))}
               </div>
             </div>
 
-            <label className="text-[10px] sm:text-[12px] text-[#00ffff] font-black uppercase tracking-[0.2em] block flex items-center gap-2">
-                <Target size={10}/> Jalankan Device & Enrollment
+            <label className="text-[12px] text-[#00ffff] font-black uppercase tracking-[0.2em] block flex items-center gap-2">
+                <Target size={12}/> Jalankan Device & Enrollment
             </label>
 
             <div className="flex flex-col gap-2 mt-auto font-mono">
-              <div className="flex flex-col sm:flex-row gap-2">
+              <div className="flex gap-2">
                 <button onClick={async () => {
                   const res = await handleAction('/api/fingerprint/startcapture', { mode: parseInt(mode), nMissingFinger: 0 });
                   if (res.success) setIsCapturing(true);
-                }} disabled={!isConnected || isCapturing} className={`flex-1 py-1.5 sm:py-2 border-2 font-black uppercase text-[14px] sm:text-[18px] transition-all flex items-center justify-center gap-1 sm:gap-2 rounded-sm ${isConnected && !isCapturing ? 'bg-[#00ffff]/10 border-[#00ffff] text-[#00ffff] hover:bg-[#00ffff] hover:text-black shadow-inner' : 'bg-zinc-900 border-zinc-800 text-zinc-600 cursor-not-allowed'}`}><Play size={11} fill="currentColor" /> Preview</button>
+                }} disabled={!isConnected || isCapturing} className={`flex-1 py-1 border-2 font-black uppercase text-[18px] transition-all flex items-center justify-center gap-2 rounded-sm ${isConnected && !isCapturing ? 'bg-[#00ffff]/10 border-[#00ffff] text-[#00ffff] hover:bg-[#00ffff] hover:text-black shadow-inner' : 'bg-zinc-900 border-zinc-800 text-zinc-600 cursor-not-allowed'}`}><Play size={12} fill="currentColor" /> Preview</button>
                 <button onClick={async () => {
                   const res = await handleAction('/api/fingerprint/stopcapture');
                   if (res.success !== false) setIsCapturing(false);
-                }} disabled={!isCapturing} className={`flex-1 py-1.5 sm:py-2 border-2 font-black uppercase text-[14px] sm:text-[18px] transition-all flex items-center justify-center gap-1 sm:gap-2 rounded-sm ${isCapturing ? 'bg-zinc-950 border-[#ff00ff] text-[#ff00ff] hover:bg-[#ff00ff] hover:text-white' : 'bg-zinc-900 border-zinc-800 text-zinc-600'}`}><CircleStop size={11} fill="currentColor" /> Stop</button>
+                }} disabled={!isCapturing} className={`flex-1 py-1 border-2 font-black uppercase text-[18px] transition-all flex items-center justify-center gap-2 rounded-sm ${isCapturing ? 'bg-zinc-950 border-[#ff00ff] text-[#ff00ff] hover:bg-[#ff00ff] hover:text-white' : 'bg-zinc-900 border-zinc-800 text-zinc-600'}`}><CircleStop size={12} fill="currentColor" /> Stop</button>
               </div>
-              <div className="flex flex-col sm:flex-row gap-2">
-                <button onClick={handleEnroll} disabled={!isConnected || isEnrolling || !isDataSaved || enrollmentComplete} className={`flex-1 py-1.5 sm:py-2 border-1 font-black text-[14px] sm:text-[18px] uppercase transition-all rounded-sm flex items-center justify-center gap-1 sm:gap-2 ${isConnected && isDataSaved && !isEnrolling && !enrollmentComplete ? 'bg-[#00ffff] border-[#00ffff] text-black hover:bg-white shadow-lg' : 'bg-zinc-900 border-zinc-700 text-zinc-600'}`}><ShieldCheck size={12} /> {enrollmentComplete ? "SELESAI" : "Start Enroll"}</button>
-                <button onClick={handleResetForm} className="flex-1 py-1.5 sm:py-2 border-2 border-red-500/30 text-red-500 text-[14px] sm:text-[18px] font-black hover:bg-red-500 hover:text-white uppercase transition-all rounded-sm flex items-center justify-center gap-1 sm:gap-2"><Trash2 size={11} /> Reset</button>
+              <div className="flex gap-2">
+                <button onClick={handleEnroll} disabled={!isConnected || isEnrolling || !isDataSaved || enrollmentComplete} className={`flex-1 py-1 border-1 font-black text-[18px] uppercase transition-all rounded-sm flex items-center justify-center gap-2 ${isConnected && isDataSaved && !isEnrolling && !enrollmentComplete ? 'bg-[#00ffff] border-[#00ffff] text-black hover:bg-white shadow-lg' : 'bg-zinc-900 border-zinc-700 text-zinc-600'}`}><ShieldCheck size={14} /> {enrollmentComplete ? "SELESAI" : "Start Enroll"}</button>
+                <button onClick={handleResetForm} className="flex-1 py-1 border-2 border-red-500/30 text-red-500 text-[18px] font-black hover:bg-red-500 hover:text-white uppercase transition-all rounded-sm flex items-center justify-center gap-2"><Trash2 size={12} /> Reset</button>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="w-full border-2 border-[#00ffff]/20 bg-black/40 p-3 sm:p-5 rounded-sm shadow-2xl shrink-0 flex-1 min-h-0 flex flex-col font-mono">
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3 border-b border-[#00ffff]/10 pb-2 sm:pb-3 mb-3 sm:mb-4">
-          <Fingerprint size={14} className="text-[#00ffff]" />
-          <span className="text-[11px] sm:text-[14px] font-black text-[#00ffff] uppercase tracking-[0.2em] sm:tracking-[0.4em]">Finger_Extraction_Visual_Buffer</span>
+      <div className="w-full border-2 border-[#00ffff]/20 bg-black/40 p-5 rounded-sm shadow-2xl shrink-0 flex-1 min-h-0 flex flex-col font-mono">
+        <div className="flex items-center gap-3 border-b border-[#00ffff]/10 pb-3 mb-4">
+          <Fingerprint size={18} className="text-[#00ffff]" />
+          <span className="text-[14px] font-black text-[#00ffff] uppercase tracking-[0.4em]">Finger_Extraction_Visual_Buffer</span>
           <div className="ml-auto flex items-center gap-2">
-            <div className={`h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full ${isCapturing ? 'bg-[#00ffff] animate-pulse shadow-[0_0_8px_#00ffff]' : 'bg-zinc-800'}`} />
-            <span className="text-[7px] sm:text-[8px] text-zinc-500 font-bold uppercase tracking-widest">{isCapturing ? 'Live_Feed' : 'Standby'}</span>
+            <div className={`h-2 w-2 rounded-full ${isCapturing ? 'bg-[#00ffff] animate-pulse shadow-[0_0_8px_#00ffff]' : 'bg-zinc-800'}`} />
+            <span className="text-[8px] text-zinc-500 font-bold uppercase tracking-widest">{isCapturing ? 'Live_Feed' : 'Standby'}</span>
           </div>
         </div>
         
-        <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-5 md:grid-cols-6 gap-3 sm:gap-5 md:gap-10 flex-1 overflow-y-auto custom-scrollbar p-1">
+        <div className="grid grid-cols-2 md:grid-cols-5 lg:grid-cols-6 gap-10 flex-1 overflow-y-auto custom-scrollbar p-1">
           {fingerCaptures.map((img, idx) => {
             const expectedIndices = getExpectedFingerIndices(mode);
             const isExpected = expectedIndices.includes(idx);
@@ -548,20 +533,20 @@ const FingerprintModule = ({ data, activeTab }) => {
             const displayImg = img || dbFingerImages[idx];
             
             return (
-              <div key={idx} className="flex flex-col items-center gap-1">
+              <div key={idx} className="flex flex-col items-center gap-1.5">
                 <div className={`relative w-full aspect-[3/4] border-2 ${isExpected ? 'border-[#00ffff]/40 shadow-[0_0_10px_#00ffff11]' : 'border-white/5'} ${isFromDb ? 'bg-emerald-950/20' : 'bg-zinc-950'} rounded-sm overflow-hidden flex items-center justify-center transition-all`}>
                   <AnimatePresence>
                     {displayImg ? (
                       <motion.img initial={{ opacity: 0 }} animate={{ opacity: 1 }} src={displayImg} className="w-full h-full object-contain p-1 filter brightness-110 contrast-125" alt="Finger" />
                     ) : (
-                      <Fingerprint size={24} className="opacity-[0.03]" />
+                      <Fingerprint size={32} className="opacity-[0.03]" />
                     )}
                   </AnimatePresence>
                   {isCapturing && !displayImg && isExpected && <div className="absolute inset-x-0 h-[2px] bg-[#00ffff]/60 shadow-[0_0_10px_#00ffff] animate-pixel-scan z-20" />}
-                  <div className={`absolute top-0 left-0 bg-black/80 px-1 py-0.5 text-[6px] font-black ${displayImg ? 'text-emerald-400' : 'text-[#00ffff]/30'} border-r border-b border-[#00ffff]/10 uppercase tracking-tighter`}>{getFingerName(idx).substring(0, 3)}</div>
-                  {isFromDb && <div className="absolute bottom-0 right-0 bg-emerald-500/80 px-1 py-0.5 text-[5px] font-black text-white uppercase tracking-tighter">DB</div>}
+                  <div className={`absolute top-0 left-0 bg-black/80 px-1.5 py-0.5 text-[7px] font-black ${displayImg ? 'text-emerald-400' : 'text-[#00ffff]/30'} border-r border-b border-[#00ffff]/10 uppercase tracking-tighter`}>{getFingerName(idx).substring(0, 3)}</div>
+                  {isFromDb && <div className="absolute bottom-0 right-0 bg-emerald-500/80 px-1 py-0.5 text-[6px] font-black text-white uppercase tracking-tighter">DB</div>}
                 </div>
-                <span className={`text-[6px] sm:text-[7px] md:text-[8px] font-black uppercase tracking-widest ${isExpected ? 'text-[#00ffff]/80' : 'text-zinc-600'}`}>{idx < 5 ? `L_${idx + 1}` : `R_${idx - 4}`}</span>
+                <span className={`text-[8px] font-black uppercase tracking-widest ${isExpected ? 'text-[#00ffff]/80' : 'text-zinc-600'}`}>{idx < 5 ? `L_${idx + 1}` : `R_${idx - 4}`}</span>
               </div>
             );
           })}
@@ -573,20 +558,7 @@ const FingerprintModule = ({ data, activeTab }) => {
         .animate-biometric-scan { animation: biometric-scan 2.5s linear infinite; }
         @keyframes pixel-scan { 0% { top: 0; } 100% { top: 100%; } }
         .animate-pixel-scan { animation: pixel-scan 2.2s linear infinite; }
-        .custom-scrollbar::-webkit-scrollbar { width: 3px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0, 255, 255, 0.1); border-radius: 10px; }
-        
-        /* Extra small breakpoint untuk responsivitas */
-        @media (min-width: 480px) {
-          .xs\\:inline { display: inline !important; }
-          .xs\\:hidden { display: none !important; }
-          .xs\\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
-        }
-        @media (max-width: 479px) {
-          .xs\\:inline { display: none !important; }
-          .xs\\:hidden { display: inline !important; }
-          .xs\\:grid-cols-3 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
-        }
+        .custom-scrollbar::-webkit-scrollbar { width: 3px; }                                                                                                       : rgba(0, 255, 255, 0.1); border-radius: 10px; }
       `}</style>
     </div>
   );

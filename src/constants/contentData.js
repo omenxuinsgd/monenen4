@@ -20,7 +20,7 @@ import {
 export const CONTENT_DATA = [
   { 
     id: 0, 
-    short: "FINGERPRINT 442", 
+    short: "FINGERPRINT_442", 
     title: "Fingerprint 4-4-2", 
     subtitle: "SCAN 4 JARI KANAN, 4 KIRI, 2 JEMPOL", 
     description: "Memaksimalkan efisiensi Enrollment melalui pemindaian 4-4-2 yang presisi. Sistem ini mendukung Matching 1:1 untuk verifikasi identitas instan, serta Matching 1:N (Identification) untuk pencarian data masif dalam basis data biometrik yang kompleks secara real-time.", 
@@ -33,7 +33,7 @@ export const CONTENT_DATA = [
   },
   { 
     id: 1, 
-    short: "DOKUMEN SCANNER A4", 
+    short: "DOKUMEN_SCANNER A4", 
     title: "Document Scanner A4", 
     subtitle: "LAYANAN PEMINDAIAN DOKUMEN A4", 
     description: "Transformasi dokumen fisik ke format digital secara instan. Dilengkapi teknologi OCR mutakhir untuk ekstraksi teks otomatis serta kemudahan untuk pembacaan Barcode/QRCode.", 
@@ -45,7 +45,7 @@ export const CONTENT_DATA = [
   },
   { 
     id: 2, 
-    short: "PASSPORT SCANNER", 
+    short: "PASSPORT_SCANNER", 
     title: "Passport Scanner", 
     subtitle: "EKSTRAKSI DATA PASSPORT BERSTANDAR ICAO", 
     description: "pengambilan data dari zona MRZ dan chip RFID paspor secara akurat mendukung standar ICAO. Dilengkapi teknologi pemindaian multispektral untuk memvalidasi fitur keamanan paspor dan memastikan integritas data identitas pemegang dokumen.", 
@@ -57,7 +57,7 @@ export const CONTENT_DATA = [
   },
   { 
     id: 3, 
-    short: "BARCODE SCANNER", 
+    short: "BARCODE_SCANNER", 
     title: "Barcode Scanner", 
     subtitle: "PEMBACA BARCODE 1D/2D & QRCODE", 
     description: "Tingkatkan produktivitas dengan teknologi pemindaian barcode 1D dan 2D (QR Code) yang responsif. Mampu membaca kode yang rusak atau buram dengan cepat untuk efisiensi manajemen inventaris dan transaksi.", 
@@ -69,7 +69,7 @@ export const CONTENT_DATA = [
   },
   { 
     id: 4, 
-    short: "OCR SCANNER", 
+    short: "OCR_SCANNER", 
     title: "OCR Scanner", 
     subtitle: "EKSTRAKSI TEKS & DATA DIGITAL", 
     description: "Konversikan dokumen statis menjadi data digital yang dinamis. Teknologi OCR kami mengenali karakter dari berbagai jenis font dan dokumen secara akurat, memungkinkan pencarian teks otomatis dan pemrosesan data tanpa input manual.", 
@@ -81,7 +81,7 @@ export const CONTENT_DATA = [
   },
   { 
     id: 5, 
-    short: "THERMAL PRINTER", 
+    short: "THERMAL_PRINTER", 
     title: "Thermal Printer", 
     subtitle: "PENCETAKAN STRUK TANPA TINTA", 
     description: "Integrasikan sistem dengan pencetakan otomatis melalui koneksi yang stabil. Dirancang untuk durabilitas tinggi dalam mencetak barcode, QR code, hingga manifes pengiriman secara presisi di berbagai kondisi operasional.", 
@@ -93,7 +93,7 @@ export const CONTENT_DATA = [
   },
   { 
     id: 6, 
-    short: "SIGN PAD", 
+    short: "SIGN_PAD", 
     title: "Sign Pad", 
     subtitle: "Digital Signature & Authentication", 
     description: "Tangkap tanda tangan digital dengan akurasi tekanan dan kemiringan yang presisi. Menjamin integritas dokumen elektronik Anda melalui teknologi enkripsi yang aman, memberikan kekuatan hukum yang setara dengan tanda tangan di atas kertas.", 
@@ -105,7 +105,7 @@ export const CONTENT_DATA = [
   },
   { 
     id: 7, 
-    short: "PALM VEIN", 
+    short: "PALM_VEIN", 
     title: "Palm Vein", 
     subtitle: "OTENTIKASI BIOMETRIK TELAPAK TANGAN TANPA SENTUH", 
     description: "Teknologi otentikasi mutakhir yang memetakan pola pembuluh darah telapak tangan. Karena pola vena berada di dalam tubuh, sistem ini menawarkan tingkat keamanan tertinggi yang mustahil dipalsukan, memberikan perlindungan maksimal untuk akses aset paling kritis", 
@@ -117,7 +117,7 @@ export const CONTENT_DATA = [
   },
   { 
     id: 8, 
-    short: "Face Recognition", 
+    short: "Face_Recognition", 
     title: "Face Recognition", 
     subtitle: "INTERAKSI NIRKABEL INSTAN BERBASIS NFC", 
     description: "Sederhanakan transaksi dan manajemen akses dengan teknologi Near Field Communication (NFC). Memungkinkan pertukaran data nirkabel yang aman untuk sistem pembayaran cashless, kontrol akses gedung, hingga verifikasi identitas secara real-time.", 
@@ -125,6 +125,6 @@ export const CONTENT_DATA = [
     tag: "Perimeter Sec", 
     Icon: Nfc, 
     status: "Sistem Pengenalan Wajah",
-    image: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&q=80&w=800" 
+    image: "https://www.tnitech.co/_next/image?url=%2Fimages%2Fhome%2Ffr.gif&w=3840&q=75" 
   }
 ];
